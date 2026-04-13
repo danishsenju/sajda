@@ -2,21 +2,18 @@
   "name": "sajda",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "dev:landing": "turbo dev --filter=landing",
+    "dev:jemaah": "turbo dev --filter=jemaah",
+    "dev:admin": "turbo dev --filter=admin",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "prettier": "^3.7.4",
-    "turbo": "^2.9.6",
-    "typescript": "5.9.2"
+    "turbo": "latest",
+    "prettier": "^3.0.0"
   },
-  "engines": {
-    "node": ">=18"
-  },
-  "packageManager": "npm@11.6.0",
   "workspaces": [
     "apps/*",
     "packages/*"
