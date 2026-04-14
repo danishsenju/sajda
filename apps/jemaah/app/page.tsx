@@ -1,65 +1,71 @@
-import Image from "next/image";
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { HomeShell } from '@/components/home/HomeShell'
+import type { FeedItem } from '@/components/home/FeedCard'
+import type { FollowedMosque } from '@/components/home/MosqueSwitcher'
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+export default async function HomePage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  /* ── Followed mosques ─────────────────────────────────────────── */
+  const { data: follows } = await supabase
+    .from('jemaah_follows')
+    .select('mosque_id, is_primary, masjid(id, name, slug, theme, jemaah_count)')
+    .eq('user_id', user.id)
+    .order('is_primary', { ascending: false })
+
+  const mosques: FollowedMosque[] = (follows ?? []).flatMap((f) => {
+    const m = f.masjid as { id: string; name: string; slug: string; theme: Record<string, string>; jemaah_count: number } | null
+    if (!m) return []
+    return [{
+      id: m.id,
+      name: m.name,
+      slug: m.slug,
+      theme: {
+        primary: m.theme?.primary ?? '#102937',
+        accent: m.theme?.accent ?? '#f9744b',
+        logo_url: m.theme?.logo_url ?? null,
+      },
+      is_primary: f.is_primary ?? false,
+      jemaah_count: m.jemaah_count ?? 0,
+    }]
+  })
+
+  const mosqueIds = mosques.map((m) => m.id)
+
+  /* ── Feed: announcements only (doa is on /doa tab) ───────────── */
+  const feedItems: FeedItem[] = []
+
+  if (mosqueIds.length > 0) {
+    const { data: announcements } = await supabase
+      .from('announcements')
+      .select('id, mosque_id, title, body, is_pinned, published_at, masjid(name, theme)')
+      .in('mosque_id', mosqueIds)
+      .is('deleted_at', null)
+      .not('published_at', 'is', null)
+      .lte('published_at', new Date().toISOString())
+      .order('is_pinned', { ascending: false })
+      .order('published_at', { ascending: false })
+      .limit(30)
+
+    for (const ann of announcements ?? []) {
+      const mosque = ann.masjid as { name: string; theme: Record<string, string> } | null
+      feedItems.push({
+        kind: 'announcement',
+        id: ann.id,
+        mosqueId: ann.mosque_id,
+        mosqueName: mosque?.name ?? '',
+        mosqueColor: mosque?.theme?.primary ?? '#1B4332',
+        title: ann.title,
+        body: ann.body,
+        isPinned: ann.is_pinned ?? false,
+        publishedAt: ann.published_at!,
+      })
+    }
+  }
+
+  return <HomeShell mosques={mosques} feed={feedItems} />
 }

@@ -43,6 +43,7 @@ Payments            ████░░░░░░  40%
 - [ ] Waktu solat (JAKIM API)
 - [ ] Hadis harian
 - [ ] Tazkirah harian
+- [ ] View Imam & Bilal timetable
 
 ---
 
@@ -54,17 +55,19 @@ Payments            ████░░░░░░  40%
 - [ ] Janaiz management
 - [ ] Sadaqah collection page
 - [ ] Analytics dashboard
+- [ ] Manage timetable for Imam & Bilal
 
 ---
 
 ## Islamic Tools
 - [ ] Waktu solat widget (location-based)
-- [ ] Qibla compass
+- [ ] Qibla compass use current location
 - [ ] Zikir counter with haptics
 - [ ] Hadis harian API integration
-- [ ] Tazkirah harian content pipeline
+- [ ] Tazkirah harian content pipeline using API
 - [ ] Al-Mathurat morning/evening
-- [ ] 99 Names of Allah
+- [ ] Deen checklist that everyday polish to make jemaah get pahala and tick
+
 
 ---
 

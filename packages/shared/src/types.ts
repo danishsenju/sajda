@@ -1,3 +1,5 @@
+export type { Database } from './types/database'
+
 export type MosqueTier = 'surau' | 'kariah' | 'komuniti'
 
 export interface Mosque {
