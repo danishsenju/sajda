@@ -1,38 +1,42 @@
 @import "tailwindcss";
 
-/* ─── Honey Pot Design Tokens ─────────────────────────────────────────── */
+/* ─── SAJDA Design Tokens ─────────────────────────────────────────────────── */
 :root {
-  /* Surfaces */
-  --surface:        #ededed;
-  --surface-2:      #ffffff;
-  --surface-3:      #e1d9cf;
-
-  /* Brand */
-  --primary:        #102937;
-  --primary-soft:   #124d54;
-
-  /* Accent */
-  --accent:         #f9744b;
-  --accent-hover:   #d84f2a;
-  --accent-soft:    rgba(249, 116, 75, 0.12);
+  /* Backgrounds */
+  --surface:        #F7F6F3;
+  --surface-2:      #FFFFFF;
+  --surface-3:      #F0EEE9;
 
   /* Text */
-  --text:           #091d26;
-  --text-muted:     #094044;
-  --text-dim:       #6b8e92;
+  --text:           #1A1916;
+  --text-muted:     #6B6860;
+  --text-dim:       #A8A49E;
+
+  /* Brand / Accent */
+  --primary:        #1A1916;
+  --accent:         #2D6A4F;
+  --accent-2:       #52B788;
+  --accent-surface: #EAF4EE;
+  --accent-border:  #C7E6D4;
+
+  /* Legacy aliases kept for dynamic mosque theming */
+  --accent-soft:    #EAF4EE;
+  --accent-hover:   #235540;
+  --primary-soft:   #2D6A4F;
+
+  /* Borders */
+  --border:         #E8E5DF;
+  --border-strong:  #D5D0C9;
+  --border-accent:  #C7E6D4;
 
   /* Semantic */
   --success:        #2a9d6e;
   --warning:        #e9a84c;
-  --error:          #d94f3d;
-
-  /* Borders */
-  --border:         rgba(16, 41, 55, 0.10);
-  --border-strong:  rgba(16, 41, 55, 0.20);
-  --border-accent:  rgba(249, 116, 75, 0.25);
+  --error:          #C0392B;
+  --danger:         #C0392B;
 }
 
-/* ─── Tailwind v4 Theme Mapping ───────────────────────────────────────── */
+/* ─── Tailwind v4 Theme Mapping ───────────────────────────────────────────── */
 @theme inline {
   --color-surface:        var(--surface);
   --color-surface-2:      var(--surface-2);
@@ -49,7 +53,7 @@
   --color-error:          var(--error);
   --color-border:         var(--border);
   --color-border-accent:  var(--border-accent);
-  --font-sans:            var(--font-lexend);
+  --font-sans:            var(--font-jakarta);
   --font-display:         var(--font-playfair);
   --font-arabic:          var(--font-amiri);
   --radius-card:          16px;
@@ -69,27 +73,13 @@ html {
 body {
   background-color: var(--surface);
   color: var(--text);
-  font-family: var(--font-lexend), system-ui, sans-serif;
+  font-family: var(--font-jakarta), system-ui, sans-serif;
   overscroll-behavior-y: none;
 }
 
 /* ─── Safe-area helpers ───────────────────────────────────────────────── */
 .safe-top    { padding-top:    env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-
-/* ─── Card shadow ─────────────────────────────────────────────────────── */
-.card-shadow {
-  box-shadow: 0 2px 12px rgba(16, 41, 55, 0.08), 0 0 0 1px rgba(16, 41, 55, 0.06);
-}
-
-.card-shadow-md {
-  box-shadow: 0 4px 24px rgba(16, 41, 55, 0.10), 0 0 0 1px rgba(16, 41, 55, 0.06);
-}
-
-/* ─── Coral glow utility ──────────────────────────────────────────────── */
-.glow-accent {
-  box-shadow: 0 4px 20px rgba(249, 116, 75, 0.30);
-}
 
 /* ─── Scrollbar (webkit) ──────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }

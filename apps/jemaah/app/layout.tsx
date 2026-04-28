@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next'
-import { Lexend_Deca, Playfair_Display, Amiri } from 'next/font/google'
+import { Plus_Jakarta_Sans, Playfair_Display, Amiri } from 'next/font/google'
 import './globals.css'
 
-const lexendDeca = Lexend_Deca({
-  variable: '--font-lexend',
+const jakarta = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 })
 
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#102937',
+  themeColor: '#FFFFFF',
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="ms"
-      className={`${lexendDeca.variable} ${playfair.variable} ${amiri.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${playfair.variable} ${amiri.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-surface text-foreground">
         {children}

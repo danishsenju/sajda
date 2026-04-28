@@ -1,323 +1,171 @@
 'use client'
 
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
+import type { DailyHadis } from '@/app/actions/hadis'
 
-/* ─── Hadis data (30 authentic hadis, cycling by day of month) ───────────── */
+/* ─── Helper ─────────────────────────────────────────────────────────────── */
 
-const HADIS = [
-  {
-    arabic: 'إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى',
-    malay: 'Sesungguhnya setiap amalan itu bergantung kepada niat, dan sesungguhnya bagi setiap orang apa yang dia niatkan.',
-    source: 'Sahih Bukhari', number: '1', narrator: 'Umar bin al-Khattab RA',
-  },
-  {
-    arabic: 'بُنِيَ الْإِسْلَامُ عَلَى خَمْسٍ: شَهَادَةِ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَنَّ مُحَمَّدًا رَسُولُ اللَّهِ، وَإِقَامِ الصَّلَاةِ، وَإِيتَاءِ الزَّكَاةِ، وَحَجِّ الْبَيْتِ، وَصَوْمِ رَمَضَانَ',
-    malay: 'Islam dibina atas lima perkara: syahadah bahawa tiada tuhan melainkan Allah dan Muhammad itu rasul-Nya, mendirikan solat, menunaikan zakat, mengerjakan haji ke Baitullah, dan berpuasa di bulan Ramadan.',
-    source: 'Sahih Bukhari & Muslim', number: '8', narrator: 'Abdullah bin Umar RA',
-  },
-  {
-    arabic: 'الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ',
-    malay: 'Seorang Muslim ialah orang yang kaum Muslimin lain selamat dari gangguan lidah dan tangannya.',
-    source: 'Sahih Bukhari', number: '10', narrator: 'Abdullah bin Amr RA',
-  },
-  {
-    arabic: 'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ',
-    malay: 'Barangsiapa yang beriman kepada Allah dan hari akhirat, hendaklah dia berkata baik atau diam.',
-    source: 'Sahih Bukhari & Muslim', number: '6018', narrator: 'Abu Hurairah RA',
-  },
-  {
-    arabic: 'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ',
-    malay: 'Tidak sempurna iman seseorang di antara kamu sehingga dia mencintai untuk saudaranya apa yang dia cintai untuk dirinya sendiri.',
-    source: 'Sahih Bukhari & Muslim', number: '13', narrator: 'Anas bin Malik RA',
-  },
-  {
-    arabic: 'إِنَّ اللَّهَ لَا يَنْظُرُ إِلَى صُوَرِكُمْ وَأَمْوَالِكُمْ وَلَكِنْ يَنْظُرُ إِلَى قُلُوبِكُمْ وَأَعْمَالِكُمْ',
-    malay: 'Sesungguhnya Allah tidak melihat kepada rupa paras kamu dan harta kamu, tetapi Dia melihat kepada hati dan amalan kamu.',
-    source: 'Sahih Muslim', number: '2564', narrator: 'Abu Hurairah RA',
-  },
-  {
-    arabic: 'خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ',
-    malay: 'Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia.',
-    source: 'HR Thabrani & Daruquthni', number: '—', narrator: 'Jabir bin Abdullah RA',
-  },
-  {
-    arabic: 'الْحَيَاءُ لَا يَأْتِي إِلَّا بِخَيْرٍ',
-    malay: 'Malu itu tidak mendatangkan melainkan kebaikan.',
-    source: 'Sahih Bukhari & Muslim', number: '37', narrator: 'Imran bin Husain RA',
-  },
-  {
-    arabic: 'تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ',
-    malay: 'Senyumanmu kepada saudaramu adalah sedekah.',
-    source: 'HR Tirmidhi', number: '1956', narrator: 'Abu Dzar al-Ghifari RA',
-  },
-  {
-    arabic: 'طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ',
-    malay: 'Menuntut ilmu adalah kewajipan bagi setiap Muslim.',
-    source: 'HR Ibn Majah', number: '224', narrator: 'Anas bin Malik RA',
-  },
-  {
-    arabic: 'الدِّينُ النَّصِيحَةُ',
-    malay: 'Agama itu adalah nasihat.',
-    source: 'Sahih Muslim', number: '55', narrator: 'Tamim ad-Dari RA',
-  },
-  {
-    arabic: 'إِنَّ مِنْ أَكْمَلِ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا',
-    malay: 'Sesungguhnya yang paling sempurna imannya di antara orang mukmin adalah yang paling baik akhlaknya.',
-    source: 'HR Abu Dawud & Tirmidhi', number: '4682', narrator: 'Abu Hurairah RA',
-  },
-  {
-    arabic: 'الرَّاحِمُونَ يَرْحَمُهُمُ الرَّحْمَنُ، ارْحَمُوا مَنْ فِي الْأَرْضِ يَرْحَمْكُمْ مَنْ فِي السَّمَاءِ',
-    malay: 'Orang-orang yang penyayang, Allah Yang Maha Penyayang akan menyayangi mereka. Sayangilah makhluk yang ada di bumi, nescaya yang ada di langit akan menyayangi kamu.',
-    source: 'HR Abu Dawud & Tirmidhi', number: '1924', narrator: 'Abdullah bin Amr RA',
-  },
-  {
-    arabic: 'مَنْ لَا يَشْكُرِ النَّاسَ لَا يَشْكُرِ اللَّهَ',
-    malay: 'Barangsiapa yang tidak bersyukur kepada manusia, dia tidak bersyukur kepada Allah.',
-    source: 'HR Abu Dawud & Tirmidhi', number: '4811', narrator: 'Abu Hurairah RA',
-  },
-  {
-    arabic: 'أَفْضَلُ الصِّيَامِ بَعْدَ رَمَضَانَ شَهْرُ اللَّهِ الْمُحَرَّمُ',
-    malay: 'Puasa yang paling utama selepas Ramadan adalah puasa di bulan Allah, iaitu Muharram.',
-    source: 'Sahih Muslim', number: '1163', narrator: 'Abu Hurairah RA',
-  },
-  {
-    arabic: 'مَنْ صَامَ يَوْمًا فِي سَبِيلِ اللَّهِ بَعَّدَ اللَّهُ وَجْهَهُ عَنِ النَّارِ سَبْعِينَ خَرِيفًا',
-    malay: 'Barangsiapa yang berpuasa sehari di jalan Allah, Allah akan menjauhkan wajahnya dari api neraka sejauh perjalanan tujuh puluh tahun.',
-    source: 'Sahih Bukhari & Muslim', number: '2840', narrator: 'Abu Said al-Khudri RA',
-  },
-  {
-    arabic: 'إِذَا مَاتَ ابْنُ آدَمَ انْقَطَعَ عَمَلُهُ إِلَّا مِنْ ثَلَاثَةٍ: صَدَقَةٍ جَارِيَةٍ، أَوْ عِلْمٍ يُنْتَفَعُ بِهِ، أَوْ وَلَدٍ صَالِحٍ يَدْعُو لَهُ',
-    malay: 'Apabila manusia meninggal dunia, terputuslah amalannya kecuali tiga perkara: sedekah jariah, ilmu yang bermanfaat, atau anak soleh yang mendoakannya.',
-    source: 'Sahih Muslim', number: '1631', narrator: 'Abu Hurairah RA',
-  },
-  {
-    arabic: 'مَا مِنْ مُسْلِمٍ يَغْرِسُ غَرْسًا إِلَّا كَانَ مَا أُكِلَ مِنْهُ لَهُ صَدَقَةً',
-    malay: 'Tidaklah seorang Muslim menanam tanaman melainkan apa yang dimakan darinya menjadi sedekah baginya.',
-    source: 'Sahih Muslim', number: '1552', narrator: 'Jabir bin Abdullah RA',
-  },
-  {
-    arabic: 'أَحَبُّ الْأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ',
-    malay: 'Amalan yang paling dicintai Allah adalah yang paling berterusan walaupun sedikit.',
-    source: 'Sahih Bukhari & Muslim', number: '6464', narrator: 'Aisyah RA',
-  },
-  {
-    arabic: 'لَوْ كَانَتِ الدُّنْيَا تَعْدِلُ عِنْدَ اللَّهِ جَنَاحَ بَعُوضَةٍ مَا سَقَى كَافِرًا مِنْهَا شَرْبَةَ مَاءٍ',
-    malay: 'Seandainya dunia ini bernilai di sisi Allah seperti sayap nyamuk, nescaya Dia tidak akan memberi minum kepada orang kafir walau seteguk air pun.',
-    source: 'HR Tirmidhi', number: '2320', narrator: 'Sahl bin Saad RA',
-  },
-  {
-    arabic: 'كُلُّ مَعْرُوفٍ صَدَقَةٌ',
-    malay: 'Setiap kebaikan adalah sedekah.',
-    source: 'Sahih Bukhari', number: '6021', narrator: 'Jabir bin Abdullah RA',
-  },
-  {
-    arabic: 'اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ وَأَتْبِعِ السَّيِّئَةَ الْحَسَنَةَ تَمْحُهَا وَخَالِقِ النَّاسَ بِخُلُقٍ حَسَنٍ',
-    malay: 'Bertakwalah kepada Allah di mana saja kamu berada, ikutilah perbuatan buruk dengan perbuatan baik yang dapat menghapuskannya, dan bergaullah dengan manusia dengan akhlak yang baik.',
-    source: 'HR Tirmidhi', number: '1987', narrator: 'Abu Dzar RA & Muaz bin Jabal RA',
-  },
-  {
-    arabic: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
-    malay: 'Barangsiapa yang menempuh suatu jalan untuk mencari ilmu, Allah akan mudahkan baginya jalan menuju syurga.',
-    source: 'Sahih Muslim', number: '2699', narrator: 'Abu Hurairah RA',
-  },
-  {
-    arabic: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ',
-    malay: 'Sebaik-baik kamu adalah yang mempelajari Al-Quran dan mengajarkannya.',
-    source: 'Sahih Bukhari', number: '5027', narrator: 'Utsman bin Affan RA',
-  },
-  {
-    arabic: 'أَقْرَبُ مَا يَكُونُ الْعَبْدُ مِنْ رَبِّهِ وَهُوَ سَاجِدٌ',
-    malay: 'Keadaan yang paling dekat antara seorang hamba dengan Tuhannya adalah ketika dia sujud.',
-    source: 'Sahih Muslim', number: '482', narrator: 'Abu Hurairah RA',
-  },
-  {
-    arabic: 'مَنْ قَرَأَ حَرْفًا مِنْ كِتَابِ اللَّهِ فَلَهُ بِهِ حَسَنَةٌ وَالْحَسَنَةُ بِعَشْرِ أَمْثَالِهَا',
-    malay: 'Barangsiapa yang membaca satu huruf dari Kitab Allah, maka baginya satu kebaikan, dan satu kebaikan itu dilipatgandakan menjadi sepuluh.',
-    source: 'HR Tirmidhi', number: '2910', narrator: 'Abdullah bin Masud RA',
-  },
-  {
-    arabic: 'اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي',
-    malay: 'Ya Allah, sesungguhnya Engkau Maha Pemaaf, Engkau mencintai kemaafan, maka maafkanlah aku.',
-    source: 'HR Tirmidhi & Ibn Majah', number: '3513', narrator: 'Aisyah RA',
-  },
-  {
-    arabic: 'الدُّعَاءُ هُوَ الْعِبَادَةُ',
-    malay: 'Doa itulah ibadah.',
-    source: 'HR Abu Dawud & Tirmidhi', number: '3372', narrator: 'An-Numan bin Basyir RA',
-  },
-  {
-    arabic: 'أَفْضَلُ الذِّكْرِ لَا إِلَهَ إِلَّا اللَّهُ',
-    malay: 'Zikir yang paling utama ialah La ilaha illallah.',
-    source: 'HR Tirmidhi & Ibn Majah', number: '3383', narrator: 'Jabir bin Abdullah RA',
-  },
-  {
-    arabic: 'صِلَةُ الرَّحِمِ تَزِيدُ فِي الْعُمْرِ وَتَنْفِي الْفَقْرَ',
-    malay: 'Silaturrahim menambah umur dan menolak kefakiran.',
-    source: 'HR Ahmad', number: '—', narrator: 'Abu Hurairah RA',
-  },
-]
+async function shareHadis(english: string, source: string) {
+  const text = `${english}\n\n— ${source}`
+  if (navigator.share) {
+    await navigator.share({ title: 'Hadis Harian · SAJDA', text }).catch(() => {})
+  } else {
+    await navigator.clipboard.writeText(text).catch(() => {})
+  }
+}
 
 /* ─── HadisHarian ────────────────────────────────────────────────────────── */
 
-export function HadisHarian() {
-  const todayIdx = (new Date().getDate() - 1) % HADIS.length
-  const [idx, setIdx] = useState(todayIdx)
-  const [direction, setDirection] = useState(1)
-
-  const hadis = HADIS[idx]!
-  const isToday = idx === todayIdx
-
-  function go(d: 1 | -1) {
-    setDirection(d)
-    setIdx((prev) => (prev + d + HADIS.length) % HADIS.length)
+export function HadisHarian({ data }: { data: DailyHadis | null }) {
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 px-8 text-center gap-4">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: 'var(--surface-2)' }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
+              stroke="var(--text-dim)" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        </div>
+        <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Hadis hari ini tidak dapat dimuatkan</p>
+        <p className="text-xs" style={{ color: 'var(--text-dim)' }}>Sila semak sambungan internet dan cuba semula.</p>
+      </div>
+    )
   }
 
   return (
-    <div className="px-4 pt-4 pb-10 md:px-0">
-
-      {/* ── Day badge ──────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-4">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="pb-10"
+    >
+      {/* ── Header: source + hadith number ── */}
+      <div
+        className="mx-4 mt-4 rounded-2xl overflow-hidden md:mx-0"
+        style={{ background: 'var(--primary)', boxShadow: '0 6px 28px rgba(16,41,55,0.18)' }}
+      >
         <div
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-          style={{ background: isToday ? 'var(--accent-soft)' : 'var(--surface-2)' }}
+          className="flex items-center justify-between px-5 pt-4 pb-2"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-            <rect x="3" y="4" width="18" height="18" rx="2" stroke={isToday ? 'var(--accent)' : 'var(--text-dim)'} strokeWidth="1.8" />
-            <path d="M16 2V6M8 2V6M3 10H21" stroke={isToday ? 'var(--accent)' : 'var(--text-dim)'} strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-          <span
-            className="text-xs font-semibold"
-            style={{ color: isToday ? 'var(--accent)' : 'var(--text-muted)' }}
-          >
-            {isToday ? 'Hadis Hari Ini' : `Hadis Hari ke-${idx + 1}`}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.50)' }}>
+              Hadis Harian
+            </span>
+            <span
+              className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+              style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.60)' }}
+            >
+              {data.source}
+            </span>
+          </div>
+          {data.hadith_number && (
+            <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              No. {data.hadith_number}
+            </span>
+          )}
         </div>
 
-        <div className="flex gap-1">
-          <button
-            onClick={() => go(-1)}
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--surface-2)' }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="var(--text-dim)" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
-          <button
-            onClick={() => go(1)}
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--surface-2)' }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M9 18L15 12L9 6" stroke="var(--text-dim)" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* ── Hadis card ─────────────────────────────────────────────── */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={idx}
-          initial={{ opacity: 0, x: direction * 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -direction * 24 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-        >
-          {/* Arabic text */}
-          <div
-            className="rounded-2xl px-5 py-6 mb-4"
-            style={{
-              background: 'var(--primary)',
-              boxShadow: '0 8px 32px rgba(16,41,55,0.18)',
-            }}
-          >
+        {/* Arabic text (if available) */}
+        {data.arabic_text ? (
+          <div className="px-5 py-6">
             <p
-              className="text-center leading-loose"
+              className="text-right leading-loose"
               style={{
-                color: '#fff',
                 fontFamily: 'var(--font-amiri)',
                 fontSize: 22,
                 direction: 'rtl',
+                color: '#fff',
                 lineHeight: 2.2,
               }}
             >
-              {hadis.arabic}
+              {data.arabic_text.trim()}
             </p>
           </div>
-
-          {/* Translation */}
-          <div
-            className="rounded-2xl p-5 mb-4"
-            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-          >
-            <p
-              className="text-sm leading-relaxed"
-              style={{
-                color: 'var(--text)',
-                fontFamily: 'var(--font-playfair)',
-                fontStyle: 'italic',
-                lineHeight: 1.85,
-              }}
-            >
-              &ldquo;{hadis.malay}&rdquo;
-            </p>
-          </div>
-
-          {/* Source & narrator */}
-          <div
-            className="rounded-xl px-4 py-3 flex items-center justify-between"
-            style={{ background: 'var(--surface-2)' }}
-          >
-            <div>
-              <p className="text-xs font-semibold" style={{ color: 'var(--text)' }}>
-                {hadis.source}
-                {hadis.number !== '—' && ` · No. ${hadis.number}`}
-              </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-dim)' }}>
-                Diriwayatkan oleh {hadis.narrator}
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: 'Hadis Harian — SAJDA',
-                    text: `"${hadis.malay}"\n\n${hadis.source}`,
-                  })
-                }
-              }}
-              className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ background: 'var(--surface-3)' }}
-              aria-label="Kongsi hadis"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <circle cx="18" cy="5" r="3" stroke="var(--text-dim)" strokeWidth="1.8" />
-                <circle cx="6" cy="12" r="3" stroke="var(--text-dim)" strokeWidth="1.8" />
-                <circle cx="18" cy="19" r="3" stroke="var(--text-dim)" strokeWidth="1.8" />
-                <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" stroke="var(--text-dim)" strokeWidth="1.8" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Progress dots */}
-          <div className="flex justify-center gap-1 mt-5">
-            {Array.from({ length: Math.min(HADIS.length, 30) }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { setDirection(i > idx ? 1 : -1); setIdx(i) }}
-                className="rounded-full transition-all"
-                style={{
-                  width: i === idx ? 18 : 6,
-                  height: 6,
-                  background: i === idx ? 'var(--accent)' : 'var(--border-strong)',
-                }}
+        ) : (
+          <div className="flex justify-center py-6">
+            <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+              <path
+                d="M20 6C17.24 6 15 8.24 15 11C15 13.76 17.24 16 20 16C20.74 16 21.44 15.83 22.07 15.54C21.01 17.6 18.85 19 16.36 19C12.83 19 10 16.17 10 12.64C10 9.11 12.83 6.28 16.36 6.28C17.62 6.28 18.79 6.65 19.78 7.28C19.85 6.85 19.92 6.43 20 6Z"
+                fill="rgba(255,255,255,0.18)"
               />
-            ))}
+              <circle cx="26" cy="7" r="1.4" fill="rgba(255,255,255,0.22)" />
+              <circle cx="8"  cy="10" r="0.9" fill="rgba(255,255,255,0.14)" />
+            </svg>
           </div>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+        )}
+      </div>
+
+      {/* ── English translation ── */}
+      <div
+        className="mx-4 mt-3 rounded-2xl p-5 md:mx-0"
+        style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+      >
+        <p
+          className="text-[15px] leading-relaxed"
+          style={{
+            color: 'var(--text)',
+            fontFamily: 'var(--font-playfair)',
+            fontStyle: 'italic',
+            lineHeight: 1.9,
+          }}
+        >
+          &ldquo;{data.english_text}&rdquo;
+        </p>
+      </div>
+
+      {/* ── Malay translation placeholder ── */}
+      <div
+        className="mx-4 mt-3 rounded-2xl px-4 py-3 flex items-center gap-3 md:mx-0"
+        style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+      >
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: 'rgba(249,116,75,0.10)' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--accent)" strokeWidth="1.8" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-xs font-semibold" style={{ color: 'var(--text)' }}>Terjemahan Bahasa Melayu</p>
+          <p className="text-[11px]" style={{ color: 'var(--text-dim)' }}>
+            Akan diambil dari jadual <code className="font-mono">hadis_malay</code> Supabase — segera hadir
+          </p>
+        </div>
+      </div>
+
+      {/* ── Muhasabah ── */}
+      <div
+        className="mx-4 mt-3 rounded-2xl px-5 py-4 md:mx-0"
+        style={{ background: 'rgba(249,116,75,0.07)', border: '1px solid rgba(249,116,75,0.18)' }}
+      >
+        <p className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--accent)' }}>
+          Muhasabah
+        </p>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--text)', fontStyle: 'italic' }}>
+          Bagaimanakah hadis ini boleh aku hayati dan amalkan dalam tindakanku hari ini?
+        </p>
+      </div>
+
+      {/* ── Share ── */}
+      <div className="flex justify-center mt-6">
+        <motion.button
+          whileTap={{ scale: 0.94 }}
+          onClick={() => shareHadis(data.english_text, data.source)}
+          className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold"
+          style={{ background: 'var(--surface-2)', color: 'var(--text-dim)', border: '1px solid var(--border)' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="1.8" />
+            <circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+            <circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          Kongsi Hadis
+        </motion.button>
+      </div>
+    </motion.div>
   )
 }

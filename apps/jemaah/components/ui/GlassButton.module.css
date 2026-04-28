@@ -1,0 +1,105 @@
+/* ── GlassButton ─────────────────────────────────────────────────────────── */
+
+/* Default pill shape — override via className (e.g. rounded-2xl) as needed */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.25),
+    rgba(255, 255, 255, 0.05)
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+/* ── Shine sweep (::before) ───────────────────────────────────────────────── */
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%) skewX(-20deg);
+  pointer-events: none;
+}
+
+.btn:hover::before {
+  animation: glassShine 1s ease forwards;
+}
+
+@keyframes glassShine {
+  0%   { transform: translateX(-100%) skewX(-20deg); }
+  100% { transform: translateX(200%) skewX(-20deg); }
+}
+
+/* ── Floating drop shadow (::after) ──────────────────────────────────────── */
+
+.btn::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 15%;
+  right: 15%;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  filter: blur(15px);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: -1;
+}
+
+.btn:hover::after {
+  opacity: 0.6;
+}
+
+/* ── Variant: primary (coral tint) ───────────────────────────────────────── */
+
+.primary {
+  background: linear-gradient(
+    to bottom,
+    rgba(249, 116, 75, 0.35),
+    rgba(249, 116, 75, 0.12)
+  );
+  border-color: rgba(249, 116, 75, 0.35);
+  box-shadow:
+    0 10px 30px rgba(249, 116, 75, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.primary::after {
+  background: rgba(249, 116, 75, 0.3);
+}
+
+/* ── Variant: ghost (pure white glass) ───────────────────────────────────── */
+
+.ghost {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.25),
+    rgba(255, 255, 255, 0.05)
+  );
+  border-color: rgba(255, 255, 255, 0.22);
+}

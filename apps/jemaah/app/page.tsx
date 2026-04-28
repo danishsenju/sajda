@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { HomeShell } from '@/components/home/HomeShell'
 import type { FeedItem } from '@/components/home/FeedCard'
 import type { FollowedMosque } from '@/components/home/MosqueSwitcher'
+import { getTodayTazkirah } from '@/app/actions/tazkirah'
+import { getQuranBookmark } from '@/app/actions/quran'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -67,5 +69,18 @@ export default async function HomePage() {
     }
   }
 
-  return <HomeShell mosques={mosques} feed={feedItems} />
+  /* ── Tazkirah + Quran bookmark (run in parallel) ─────────────── */
+  const [tazkirah, quranBookmark] = await Promise.all([
+    getTodayTazkirah(),
+    getQuranBookmark(),
+  ])
+
+  return (
+    <HomeShell
+      mosques={mosques}
+      feed={feedItems}
+      tazkirah={tazkirah}
+      quranBookmark={quranBookmark}
+    />
+  )
 }

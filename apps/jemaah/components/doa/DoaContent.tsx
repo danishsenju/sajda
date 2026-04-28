@@ -282,8 +282,10 @@ function PostDoaSheet({
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
+  const MIN_CHARS = 10
   const charsLeft = MAX_CHARS - text.length
-  const canSubmit = text.trim().length > 0 && !isPending
+  const trimmedLength = text.trim().length
+  const canSubmit = trimmedLength >= MIN_CHARS && !isPending
 
   function handleClose() {
     if (isPending) return
@@ -402,6 +404,10 @@ function PostDoaSheet({
                 <div className="flex justify-between items-center mt-1.5 px-1">
                   {error ? (
                     <p className="text-[11px]" style={{ color: 'var(--error)' }}>{error}</p>
+                  ) : trimmedLength > 0 && trimmedLength < MIN_CHARS ? (
+                    <p className="text-[11px]" style={{ color: 'var(--warning)' }}>
+                      Minimum {MIN_CHARS} huruf ({MIN_CHARS - trimmedLength} lagi)
+                    </p>
                   ) : (
                     <span />
                   )}

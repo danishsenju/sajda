@@ -9,6 +9,20 @@ import { BottomNav } from '@/components/ui/BottomNav'
 import { Sidebar } from '@/components/ui/Sidebar'
 import type { FollowedMosque } from './MosqueSwitcher'
 import type { FeedItem } from './FeedCard'
+import type { TazkirahItem } from '@/app/actions/tazkirah'
+import type { QuranBookmark } from '@/app/actions/quran'
+import {
+  Bell,
+  Landmark,
+  Compass,
+  BookOpen,
+  Zap,
+  AlignLeft,
+  Clock,
+  ListChecks,
+  MessageSquare,
+  ChevronRight,
+} from 'lucide-react'
 
 /* ─── Quick actions ──────────────────────────────────────────────────────── */
 
@@ -17,87 +31,47 @@ const QUICK_ACTIONS = [
     href: '/ibadah/tasbih',
     label: 'Tasbih',
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="4" fill="var(--primary)" />
-        <circle cx="12" cy="12" r="9" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 2" />
-        <circle cx="12" cy="3" r="1.5" fill="var(--accent)" />
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2D6A4F" strokeWidth="1.5" strokeLinecap="round">
+        <circle cx="12" cy="12" r="3" />
+        <circle cx="12" cy="12" r="8" strokeDasharray="3 2.5" />
+        <circle cx="12" cy="4" r="1" fill="#2D6A4F" stroke="none" />
       </svg>
     ),
   },
   {
     href: '/ibadah/qibla',
     label: 'Kiblat',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="var(--primary)" strokeWidth="1.5" />
-        <path d="M12 3V5M12 19V21M3 12H5M19 12H21" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M12 12L15 7" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="12" cy="12" r="1.5" fill="var(--primary)" />
-      </svg>
-    ),
+    icon: <Compass size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
   {
     href: '/ibadah/quran',
     label: 'Al-Quran',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--primary)" strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--primary)" strokeWidth="1.8" />
-        <path d="M9 7h6M9 11h4" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <BookOpen size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
   {
     href: '/ibadah/solat',
     label: 'Streak',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M13 2L4.09 12.11a1 1 0 00.77 1.63L11 14l-1 8 8.92-10.11a1 1 0 00-.77-1.63L13 10l1-8z"
-          fill="rgba(249,116,75,0.15)" stroke="var(--accent)" strokeWidth="1.8"
-          strokeLinecap="round" strokeLinejoin="round"
-        />
-      </svg>
-    ),
+    icon: <Zap size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
   {
     href: '/ibadah/hadis',
     label: 'Hadis',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="var(--primary)" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <AlignLeft size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
   {
     href: '/ibadah/mathurat',
     label: 'Mathurat',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="var(--primary)" strokeWidth="1.5" />
-        <path d="M12 6v6l4 2" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <Clock size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
   {
     href: '/ibadah/checklist',
     label: 'Checklist',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M9 11L12 14L22 4" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="var(--primary)" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <ListChecks size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
   {
     href: '/ibadah/tazkirah',
     label: 'Tazkirah',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8 10h8M8 13h5" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
+    icon: <MessageSquare size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
 ]
 
@@ -113,18 +87,20 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 const LS_KEY = 'sajda_active_mosque_id'
-const DEFAULT_ACCENT = '#f9744b'
+const DEFAULT_ACCENT = '#2D6A4F'
 
 /* ─── Props ──────────────────────────────────────────────────────────────── */
 
 type Props = {
   mosques: FollowedMosque[]
   feed: FeedItem[]
+  tazkirah?: TazkirahItem | null
+  quranBookmark?: QuranBookmark | null
 }
 
 /* ─── HomeShell ──────────────────────────────────────────────────────────── */
 
-export function HomeShell({ mosques, feed }: Props) {
+export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
   const [selectedMosqueId, setSelectedMosqueId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -163,7 +139,6 @@ export function HomeShell({ mosques, feed }: Props) {
     }
   }
 
-  // Home only shows announcements — doa has its own tab
   const announcements = feed.filter((item) => item.kind === 'announcement')
   const visibleFeed = selectedMosqueId
     ? announcements.filter((item) => item.mosqueId === selectedMosqueId)
@@ -173,7 +148,7 @@ export function HomeShell({ mosques, feed }: Props) {
   const selectedMosque = mosques.find((m) => m.id === selectedMosqueId)
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
+    <div className="flex min-h-screen" style={{ background: '#F7F6F3' }}>
 
       {/* ── Desktop sidebar ────────────────────────────────────────── */}
       <Sidebar
@@ -188,23 +163,16 @@ export function HomeShell({ mosques, feed }: Props) {
         {/* ── Mobile header ─────────────────────────────────────────── */}
         <header
           className="md:hidden sticky top-0 z-30 safe-top"
-          style={{ background: 'var(--primary)' }}
+          style={{ background: '#FFFFFF', borderBottom: 'none' }}
         >
-          <div className="flex items-center justify-between px-4 h-14">
+          <div className="flex items-center justify-between px-5 h-14">
 
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 2C12 2 6 7 6 12.5C6 15.81 8.69 18.5 12 18.5C15.31 18.5 18 15.81 18 12.5C18 7 12 2 12 2Z"
-                  fill="rgba(255,255,255,0.20)" stroke="rgba(255,255,255,0.60)" strokeWidth="1.2"
-                />
-                <path d="M4 23V20H20V23M1 20H23" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" />
-                <circle cx="16" cy="5" r="1.2" fill="var(--accent)" />
-              </svg>
+              <Landmark size={16} strokeWidth={1.5} color="#2D6A4F" />
               <span
-                className="text-base font-bold"
-                style={{ color: '#fff', fontFamily: 'var(--font-playfair)', letterSpacing: '0.12em' }}
+                className="text-[17px] font-semibold tracking-tight"
+                style={{ color: '#1A1916' }}
               >
                 SAJDA
               </span>
@@ -222,19 +190,13 @@ export function HomeShell({ mosques, feed }: Props) {
 
             {/* Notification bell */}
             <button
-              className="w-9 h-9 flex items-center justify-center rounded-full relative"
-              style={{ background: 'rgba(255,255,255,0.08)' }}
+              className="w-11 h-11 flex items-center justify-center rounded-full relative"
               aria-label="Pemberitahuan"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"
-                  stroke="rgba(255,255,255,0.70)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-                />
-              </svg>
+              <Bell size={20} strokeWidth={1.5} color="#1A1916" />
               <span
-                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-                style={{ background: 'var(--accent)', border: '1.5px solid var(--primary)' }}
+                className="absolute top-2 right-2 w-2 h-2 rounded-full"
+                style={{ background: '#C0392B', border: '1.5px solid #FFFFFF' }}
               />
             </button>
           </div>
@@ -248,31 +210,30 @@ export function HomeShell({ mosques, feed }: Props) {
             <PrayerBanner />
 
             {/* Akses Pantas */}
-            <div className="px-4 mt-5 md:px-0 md:mt-6">
+            <div className="px-5 mt-6 md:px-0">
               <p
-                className="text-[11px] font-semibold uppercase tracking-widest mb-3"
-                style={{ color: 'var(--text-dim)' }}
+                className="text-[12px] font-medium uppercase tracking-[0.05em] mb-3"
+                style={{ color: '#A8A49E' }}
               >
                 Akses Pantas
               </p>
-              <div className="grid grid-cols-4 gap-2 md:gap-3">
+              <div className="grid grid-cols-4 gap-2.5 md:gap-3">
                 {QUICK_ACTIONS.map((action) => (
                   <a
                     key={action.href}
                     href={action.href}
-                    className="flex flex-col items-center gap-2 py-4 px-2 rounded-2xl transition-all active:scale-95 hover:scale-[1.02]"
+                    className="flex flex-col items-center gap-2 py-3.5 px-2 rounded-[14px] transition-colors active:scale-[0.97]"
                     style={{
-                      background: 'var(--surface-2)',
-                      boxShadow: '0 1px 8px rgba(16,41,55,0.06)',
+                      background: '#FFFFFF',
+                      border: '1px solid #E8E5DF',
+                      minHeight: '44px',
                     }}
                   >
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center"
-                      style={{ background: 'var(--surface-3)' }}
+                    {action.icon}
+                    <span
+                      className="text-[12px] font-medium text-center leading-tight"
+                      style={{ color: '#6B6860' }}
                     >
-                      {action.icon}
-                    </div>
-                    <span className="text-[11px] font-medium text-center leading-tight" style={{ color: 'var(--text-muted)' }}>
                       {action.label}
                     </span>
                   </a>
@@ -280,29 +241,108 @@ export function HomeShell({ mosques, feed }: Props) {
               </div>
             </div>
 
-            {/* Siaran Masjid */}
-            {!hasFollowed ? (
-              /* No mosques followed yet */
-              <div className="mx-4 mt-5 md:mx-0 rounded-2xl p-5 text-center" style={{ background: 'var(--surface-2)', boxShadow: '0 1px 8px rgba(16,41,55,0.06)' }}>
+            {/* ── Tazkirah Harian card ─────────────────────────────── */}
+            {tazkirah && (
+              <a
+                href="/ibadah/tazkirah"
+                className="block mx-5 mt-5 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform md:mx-0"
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E8E5DF',
+                }}
+              >
                 <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
-                  style={{ background: 'var(--surface-3)' }}
+                  className="px-4 py-3 flex items-center justify-between"
+                  style={{ borderBottom: '1px solid #E8E5DF' }}
                 >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2C12 2 7 6 7 11C7 13.76 9.24 16 12 16C14.76 16 17 13.76 17 11C17 6 12 2 12 2Z" fill="none" stroke="var(--text-dim)" strokeWidth="1.8" />
-                    <path d="M5 22V18H19V22M2 18H22M8 18V16M16 18V16" stroke="var(--text-dim)" strokeWidth="1.8" strokeLinecap="round" />
-                  </svg>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#2D6A4F' }} />
+                    <span
+                      className="text-[12px] font-medium uppercase tracking-[0.05em]"
+                      style={{ color: '#A8A49E' }}
+                    >
+                      Tazkirah Hari Ini
+                    </span>
+                  </div>
+                  {tazkirah.category && (
+                    <span
+                      className="text-[11px] font-medium px-2.5 py-1 rounded-full"
+                      style={{ background: '#EAF4EE', color: '#2D6A4F' }}
+                    >
+                      {tazkirah.category}
+                    </span>
+                  )}
                 </div>
-                <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>
+                <div className="px-4 py-4">
+                  <p
+                    className="text-[16px] font-semibold mb-1.5 leading-snug"
+                    style={{ color: '#1A1916' }}
+                  >
+                    {tazkirah.title}
+                  </p>
+                  <p
+                    className="text-[14px] leading-relaxed line-clamp-2"
+                    style={{ color: '#6B6860' }}
+                  >
+                    {tazkirah.content_malay}
+                  </p>
+                </div>
+              </a>
+            )}
+
+            {/* ── Teruskan Membaca ─────────────────────────────────── */}
+            {quranBookmark && (
+              <a
+                href={`/ibadah/quran?page=${quranBookmark.page_number}`}
+                className="mx-5 mt-3 flex items-center gap-3 px-4 py-3.5 rounded-2xl active:scale-[0.98] transition-transform md:mx-0"
+                style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: '#EAF4EE' }}
+                >
+                  <BookOpen size={16} strokeWidth={1.5} color="#2D6A4F" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>
+                    Teruskan Membaca
+                  </p>
+                  <p className="text-[12px]" style={{ color: '#A8A49E' }}>
+                    Al-Quran · Halaman {quranBookmark.page_number}
+                  </p>
+                </div>
+                <ChevronRight size={16} strokeWidth={1.5} color="#A8A49E" />
+              </a>
+            )}
+
+            {/* ── Siaran Masjid / CTA ───────────────────────────────── */}
+            {!hasFollowed ? (
+              <div
+                className="mx-5 mt-5 md:mx-0 rounded-2xl p-6 text-center"
+                style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+              >
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ background: '#EAF4EE' }}
+                >
+                  <Landmark size={22} strokeWidth={1.5} color="#2D6A4F" />
+                </div>
+                <p
+                  className="text-[16px] font-semibold mb-2"
+                  style={{ color: '#1A1916' }}
+                >
                   Ikuti masjid anda
                 </p>
-                <p className="text-xs mb-4" style={{ color: 'var(--text-dim)' }}>
+                <p
+                  className="text-[14px] mb-5 leading-relaxed"
+                  style={{ color: '#6B6860' }}
+                >
                   Dapatkan siaran, program dan jadual masjid terus di sini.
                 </p>
                 <a
                   href="/masjid"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95"
-                  style={{ background: 'var(--accent)', color: '#fff' }}
+                  className="flex items-center justify-center w-full h-12 rounded-xl text-[15px] font-semibold transition-all active:scale-95"
+                  style={{ background: '#2D6A4F', color: '#FFFFFF' }}
                 >
                   Cari Masjid
                 </a>
@@ -310,19 +350,22 @@ export function HomeShell({ mosques, feed }: Props) {
             ) : (
               <>
                 {/* Section header */}
-                <div className="flex items-center justify-between px-4 mt-6 mb-3 md:px-0">
+                <div className="flex items-center justify-between px-5 mt-6 mb-3 md:px-0">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-dim)' }}>
+                    <p
+                      className="text-[12px] font-medium uppercase tracking-[0.05em] mb-0.5"
+                      style={{ color: '#A8A49E' }}
+                    >
                       Siaran Masjid
                     </p>
-                    <h2 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                    <h2 className="text-[15px] font-semibold" style={{ color: '#1A1916' }}>
                       {selectedMosque?.name ?? 'Semua Masjid'}
                     </h2>
                   </div>
                   {visibleFeed.length > 0 && (
                     <span
-                      className="text-[11px] px-2.5 py-1 rounded-full font-medium"
-                      style={{ background: 'var(--surface-2)', color: 'var(--text-dim)', boxShadow: '0 1px 4px rgba(16,41,55,0.06)' }}
+                      className="text-[12px] px-2.5 py-1 rounded-full font-medium"
+                      style={{ background: '#F0EEE9', color: '#6B6860' }}
                     >
                       {visibleFeed.length} siaran
                     </span>
@@ -339,13 +382,11 @@ export function HomeShell({ mosques, feed }: Props) {
                     >
                       <div
                         className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
-                        style={{ background: 'var(--surface-2)', boxShadow: '0 2px 8px rgba(16,41,55,0.06)' }}
+                        style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
                       >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--text-dim)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <MessageSquare size={20} strokeWidth={1.5} color="#A8A49E" />
                       </div>
-                      <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-[14px] font-medium" style={{ color: '#6B6860' }}>
                         Tiada siaran dari masjid ini lagi.
                       </p>
                     </motion.div>
@@ -354,7 +395,7 @@ export function HomeShell({ mosques, feed }: Props) {
                       key={selectedMosqueId ?? 'all'}
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                       transition={{ duration: 0.18 }}
-                      className="flex flex-col gap-3 px-4 md:px-0 md:grid md:grid-cols-2 md:items-start md:gap-4"
+                      className="flex flex-col gap-3 px-5 md:px-0 md:grid md:grid-cols-2 md:items-start md:gap-4"
                     >
                       {visibleFeed.map((item, i) => (
                         <FeedCard key={item.id} item={item} index={i} />
@@ -364,10 +405,12 @@ export function HomeShell({ mosques, feed }: Props) {
                 </AnimatePresence>
 
                 {visibleFeed.length > 0 && (
-                  <div className="flex items-center justify-center gap-2 py-8">
-                    <div className="h-px w-12" style={{ background: 'var(--border-strong)' }} />
-                    <span className="text-xs" style={{ color: 'var(--text-dim)' }}>Itu sahaja buat masa ini</span>
-                    <div className="h-px w-12" style={{ background: 'var(--border-strong)' }} />
+                  <div className="flex items-center justify-center gap-3 py-8">
+                    <div className="h-px w-10" style={{ background: '#E8E5DF' }} />
+                    <span className="text-[12px]" style={{ color: '#A8A49E' }}>
+                      Itu sahaja buat masa ini
+                    </span>
+                    <div className="h-px w-10" style={{ background: '#E8E5DF' }} />
                   </div>
                 )}
               </>
