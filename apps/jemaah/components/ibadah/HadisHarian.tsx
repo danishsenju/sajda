@@ -5,8 +5,8 @@ import type { DailyHadis } from '@/app/actions/hadis'
 
 /* ─── Helper ─────────────────────────────────────────────────────────────── */
 
-async function shareHadis(english: string, source: string) {
-  const text = `${english}\n\n— ${source}`
+async function shareHadis(hadis: DailyHadis) {
+  const text = `${hadis.arabic_text}\n\n${hadis.malay_text}\n\n— ${hadis.source}`
   if (navigator.share) {
     await navigator.share({ title: 'Hadis Harian · SAJDA', text }).catch(() => {})
   } else {
@@ -27,7 +27,7 @@ export function HadisHarian({ data }: { data: DailyHadis | null }) {
           </svg>
         </div>
         <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Hadis hari ini tidak dapat dimuatkan</p>
-        <p className="text-xs" style={{ color: 'var(--text-dim)' }}>Sila semak sambungan internet dan cuba semula.</p>
+        <p className="text-xs" style={{ color: 'var(--text-dim)' }}>Sila cuba sebentar lagi.</p>
       </div>
     )
   }
@@ -39,7 +39,7 @@ export function HadisHarian({ data }: { data: DailyHadis | null }) {
       transition={{ duration: 0.4 }}
       className="pb-10"
     >
-      {/* ── Header: source + hadith number ── */}
+      {/* ── Header card with Arabic ── */}
       <div
         className="mx-4 mt-4 rounded-2xl overflow-hidden md:mx-0"
         style={{ background: 'var(--primary)', boxShadow: '0 6px 28px rgba(16,41,55,0.18)' }}
@@ -56,44 +56,52 @@ export function HadisHarian({ data }: { data: DailyHadis | null }) {
               className="text-[10px] px-2 py-0.5 rounded-full font-medium"
               style={{ background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.60)' }}
             >
-              {data.source}
+              {data.theme}
             </span>
           </div>
-          {data.hadith_number && (
-            <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              No. {data.hadith_number}
-            </span>
-          )}
+          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            No. {data.number}
+          </span>
         </div>
 
-        {/* Arabic text (if available) */}
-        {data.arabic_text ? (
-          <div className="px-5 py-6">
-            <p
-              className="text-right leading-loose"
-              style={{
-                fontFamily: 'var(--font-amiri)',
-                fontSize: 22,
-                direction: 'rtl',
-                color: '#fff',
-                lineHeight: 2.2,
-              }}
-            >
-              {data.arabic_text.trim()}
-            </p>
-          </div>
-        ) : (
-          <div className="flex justify-center py-6">
-            <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
-              <path
-                d="M20 6C17.24 6 15 8.24 15 11C15 13.76 17.24 16 20 16C20.74 16 21.44 15.83 22.07 15.54C21.01 17.6 18.85 19 16.36 19C12.83 19 10 16.17 10 12.64C10 9.11 12.83 6.28 16.36 6.28C17.62 6.28 18.79 6.65 19.78 7.28C19.85 6.85 19.92 6.43 20 6Z"
-                fill="rgba(255,255,255,0.18)"
-              />
-              <circle cx="26" cy="7" r="1.4" fill="rgba(255,255,255,0.22)" />
-              <circle cx="8"  cy="10" r="0.9" fill="rgba(255,255,255,0.14)" />
-            </svg>
-          </div>
-        )}
+        {/* Arabic text */}
+        <div className="px-5 py-6">
+          <p
+            className="text-right leading-loose"
+            style={{
+              fontFamily: 'var(--font-amiri)',
+              fontSize: 22,
+              direction: 'rtl',
+              color: '#fff',
+              lineHeight: 2.2,
+            }}
+          >
+            {data.arabic_text.trim()}
+          </p>
+        </div>
+      </div>
+
+      {/* ── Source ── */}
+      <div className="mx-4 mt-2 md:mx-0">
+        <p className="text-[11px] text-center" style={{ color: 'var(--text-dim)' }}>
+          {data.source}
+        </p>
+      </div>
+
+      {/* ── Malay translation ── */}
+      <div
+        className="mx-4 mt-3 rounded-2xl p-5 md:mx-0"
+        style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+      >
+        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-dim)' }}>
+          Terjemahan
+        </p>
+        <p
+          className="text-[15px] leading-relaxed"
+          style={{ color: 'var(--text)', lineHeight: 1.9 }}
+        >
+          {data.malay_text}
+        </p>
       </div>
 
       {/* ── English translation ── */}
@@ -101,6 +109,9 @@ export function HadisHarian({ data }: { data: DailyHadis | null }) {
         className="mx-4 mt-3 rounded-2xl p-5 md:mx-0"
         style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
       >
+        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-dim)' }}>
+          English
+        </p>
         <p
           className="text-[15px] leading-relaxed"
           style={{
@@ -112,28 +123,6 @@ export function HadisHarian({ data }: { data: DailyHadis | null }) {
         >
           &ldquo;{data.english_text}&rdquo;
         </p>
-      </div>
-
-      {/* ── Malay translation placeholder ── */}
-      <div
-        className="mx-4 mt-3 rounded-2xl px-4 py-3 flex items-center gap-3 md:mx-0"
-        style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-      >
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(249,116,75,0.10)' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--accent)" strokeWidth="1.8" />
-          </svg>
-        </div>
-        <div>
-          <p className="text-xs font-semibold" style={{ color: 'var(--text)' }}>Terjemahan Bahasa Melayu</p>
-          <p className="text-[11px]" style={{ color: 'var(--text-dim)' }}>
-            Akan diambil dari jadual <code className="font-mono">hadis_malay</code> Supabase — segera hadir
-          </p>
-        </div>
       </div>
 
       {/* ── Muhasabah ── */}
@@ -153,7 +142,7 @@ export function HadisHarian({ data }: { data: DailyHadis | null }) {
       <div className="flex justify-center mt-6">
         <motion.button
           whileTap={{ scale: 0.94 }}
-          onClick={() => shareHadis(data.english_text, data.source)}
+          onClick={() => shareHadis(data)}
           className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold"
           style={{ background: 'var(--surface-2)', color: 'var(--text-dim)', border: '1px solid var(--border)' }}
         >
