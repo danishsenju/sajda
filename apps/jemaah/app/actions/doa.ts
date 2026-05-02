@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { containsProfanity, PROFANITY_ERROR_MSG } from '@/lib/utils/profanity'
 
 export async function toggleAamiin(
   doaWishId: string
@@ -39,6 +40,8 @@ export async function postDoa({
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return { error: 'Sila log masuk.' }
+
+  if (containsProfanity(doaText)) return { error: PROFANITY_ERROR_MSG }
 
   const displayName =
     (user.user_metadata?.full_name as string | undefined) ??

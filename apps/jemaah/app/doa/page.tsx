@@ -12,7 +12,7 @@ export default async function DoaPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  /* ── Followed mosques (for filter + post selector) ────────────────── */
+  /* ── Followed mosques ─────────────────────────────────────────────── */
   const { data: follows } = await supabase
     .from('jemaah_follows')
     .select('mosque_id, is_primary, masjid(id, name, slug, theme, jemaah_count)')
@@ -39,7 +39,7 @@ export default async function DoaPage() {
     }]
   })
 
-  /* ── Doa wishes (public feed, newest first) ───────────────────────── */
+  /* ── Doa wishes (newest first) ────────────────────────────────────── */
   const { data: rawWishes } = await supabase
     .from('doa_wishes')
     .select('id, doa_text, is_anonymous, author_name, created_at, mosque_id, masjid(name, theme)')
@@ -49,20 +49,34 @@ export default async function DoaPage() {
 
   const wishIds = (rawWishes ?? []).map((w) => w.id)
 
-  /* ── Aamiin counts + user's own aamiin ────────────────────────────── */
-  const [{ data: allAamiin }, { data: myAamiin }] = await Promise.all([
+  /* ── Aamiin counts + user's own aamiin + comment counts ───────────── */
+  const [{ data: allAamiin }, { data: myAamiin }, { data: commentCounts }] = await Promise.all([
     wishIds.length > 0
       ? supabase.from('doa_aamiin').select('doa_wish_id').in('doa_wish_id', wishIds)
       : Promise.resolve({ data: [] }),
     wishIds.length > 0
       ? supabase.from('doa_aamiin').select('doa_wish_id').eq('user_id', user.id).in('doa_wish_id', wishIds)
       : Promise.resolve({ data: [] }),
+    wishIds.length > 0
+      ? supabase
+          .from('doa_comments')
+          .select('doa_wish_id')
+          .in('doa_wish_id', wishIds)
+          .is('deleted_at', null)
+          .eq('is_flagged', false)
+      : Promise.resolve({ data: [] }),
   ])
 
-  const countMap: Record<string, number> = {}
+  const aaminCountMap: Record<string, number> = {}
   for (const row of allAamiin ?? []) {
-    countMap[row.doa_wish_id] = (countMap[row.doa_wish_id] ?? 0) + 1
+    aaminCountMap[row.doa_wish_id] = (aaminCountMap[row.doa_wish_id] ?? 0) + 1
   }
+
+  const commentCountMap: Record<string, number> = {}
+  for (const row of commentCounts ?? []) {
+    commentCountMap[row.doa_wish_id] = (commentCountMap[row.doa_wish_id] ?? 0) + 1
+  }
+
   const myAaminedSet = new Set((myAamiin ?? []).map((r) => r.doa_wish_id))
 
   const wishes: DoaWishItem[] = (rawWishes ?? []).map((w) => {
@@ -75,8 +89,9 @@ export default async function DoaPage() {
       mosqueId: w.mosque_id ?? null,
       mosqueName: mosque?.name ?? null,
       mosqueColor: mosque?.theme?.primary ?? '#102937',
-      aaminCount: countMap[w.id] ?? 0,
+      aaminCount: aaminCountMap[w.id] ?? 0,
       userHasAamined: myAaminedSet.has(w.id),
+      commentCount: commentCountMap[w.id] ?? 0,
       createdAt: w.created_at,
     }
   })

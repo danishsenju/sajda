@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { Bell } from 'lucide-react'
 import { BottomNav } from './BottomNav'
 
 /* ─── Nav items (mirrors BottomNav) ─────────────────────────────────────── */
@@ -180,44 +182,28 @@ export function AppShell({ title, children }: Props) {
         {/* Mobile header */}
         <header
           className="md:hidden sticky top-0 z-30 safe-top"
-          style={{ background: 'var(--primary)' }}
+          style={{ background: '#FFFFFF', borderBottom: '1px solid #E8E5DF' }}
         >
-          <div className="flex items-center justify-between px-4 h-14">
-            <div className="flex items-center gap-2">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 2C12 2 6 7 6 12.5C6 15.81 8.69 18.5 12 18.5C15.31 18.5 18 15.81 18 12.5C18 7 12 2 12 2Z"
-                  fill="rgba(255,255,255,0.20)"
-                  stroke="rgba(255,255,255,0.60)"
-                  strokeWidth="1.2"
-                />
-                <path d="M4 23V20H20V23M1 20H23" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" strokeLinecap="round" />
-                <circle cx="16" cy="5" r="1.2" fill="var(--accent)" />
-              </svg>
-              <span
-                className="text-lg font-bold"
-                style={{ color: '#fff', fontFamily: 'var(--font-playfair)', letterSpacing: '0.12em' }}
-              >
-                SAJDA
-              </span>
-            </div>
-            <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.80)' }}>
+          <div className="flex items-center justify-between px-5 h-14">
+            <Image
+              src="/sajda-logo.png"
+              alt="SAJDA"
+              width={80}
+              height={32}
+              className="object-contain"
+              priority
+            />
+            <span
+              className="text-[13px] font-semibold"
+              style={{ color: '#1A1916' }}
+            >
               {title}
             </span>
             <button
-              className="w-9 h-9 flex items-center justify-center rounded-full"
-              style={{ background: 'rgba(255,255,255,0.08)' }}
+              className="w-11 h-11 flex items-center justify-center rounded-full relative"
               aria-label="Pemberitahuan"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"
-                  stroke="rgba(255,255,255,0.70)"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <Bell size={20} strokeWidth={1.5} color="#1A1916" />
             </button>
           </div>
         </header>

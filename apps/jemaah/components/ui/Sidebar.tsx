@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { MosqueSwitcher } from '@/components/home/MosqueSwitcher'
 import type { FollowedMosque } from '@/components/home/MosqueSwitcher'
@@ -99,34 +100,17 @@ export function Sidebar({ mosques, selectedId, onMosqueSelect }: Props) {
     >
       {/* ── Logo ────────────────────────────────────────────────────── */}
       <div
-        className="flex items-center gap-3 px-5 h-16 flex-shrink-0"
+        className="flex items-center px-5 h-16 flex-shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: 'var(--primary)' }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 2C12 2 6 7 6 12.5C6 15.81 8.69 18.5 12 18.5C15.31 18.5 18 15.81 18 12.5C18 7 12 2 12 2Z"
-              fill="rgba(255,255,255,0.25)"
-              stroke="rgba(255,255,255,0.70)"
-              strokeWidth="1.2"
-            />
-            <path d="M4 22V20H20V22" stroke="rgba(255,255,255,0.70)" strokeWidth="1.5" strokeLinecap="round" />
-            <circle cx="16" cy="5" r="1.2" fill="var(--accent)" />
-          </svg>
-        </div>
-        <span
-          className="text-xl font-bold"
-          style={{
-            color: 'var(--primary)',
-            fontFamily: 'var(--font-playfair)',
-            letterSpacing: '0.1em',
-          }}
-        >
-          SAJDA
-        </span>
+        <Image
+          src="/sajda-logo.png"
+          alt="SAJDA"
+          width={100}
+          height={40}
+          className="object-contain"
+          priority
+        />
       </div>
 
       {/* ── Mosque Switcher ──────────────────────────────────────────── */}

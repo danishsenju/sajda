@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { LoginForm } from './LoginForm'
 
 export const metadata: Metadata = {
@@ -23,41 +24,17 @@ export default function LoginPage() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="mb-10 flex flex-col items-center gap-3">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(135deg, var(--primary) 0%, #0d3326 100%)',
-              border: '1px solid var(--border-accent)',
-              boxShadow: '0 8px 32px rgba(212,175,55,0.15)',
-            }}
-          >
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2C12 2 6 7 6 12.5C6 15.81 8.69 18.5 12 18.5C15.31 18.5 18 15.81 18 12.5C18 7 12 2 12 2Z"
-                fill="var(--primary-soft)"
-                stroke="var(--accent)"
-                strokeWidth="1.2"
-              />
-              <path
-                d="M4 23V20H20V23M1 20H23"
-                stroke="var(--accent)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-              <circle cx="16" cy="5" r="1.2" fill="var(--accent)" />
-            </svg>
-          </div>
-          <div className="text-center">
-            <h1
-              className="text-3xl font-bold tracking-widest"
-              style={{ color: 'var(--accent)', fontFamily: 'var(--font-playfair)' }}
-            >
-              SAJDA
-            </h1>
-            <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
-              Komuniti Masjid Digital
-            </p>
-          </div>
+          <Image
+            src="/sajda-logo.png"
+            alt="SAJDA"
+            width={140}
+            height={56}
+            className="object-contain"
+            priority
+          />
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            Komuniti Masjid Digital
+          </p>
         </div>
 
         {/* Card */}

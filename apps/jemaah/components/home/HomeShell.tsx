@@ -11,6 +11,7 @@ import type { FollowedMosque } from './MosqueSwitcher'
 import type { FeedItem } from './FeedCard'
 import type { TazkirahItem } from '@/app/actions/tazkirah'
 import type { QuranBookmark } from '@/app/actions/quran'
+import Image from 'next/image'
 import {
   Bell,
   Landmark,
@@ -40,7 +41,7 @@ const QUICK_ACTIONS = [
   },
   {
     href: '/ibadah/qibla',
-    label: 'Kiblat',
+    label: 'Qiblat',
     icon: <Compass size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
   {
@@ -65,7 +66,7 @@ const QUICK_ACTIONS = [
   },
   {
     href: '/ibadah/checklist',
-    label: 'Checklist',
+    label: 'Senarai',
     icon: <ListChecks size={22} strokeWidth={1.5} color="#2D6A4F" />,
   },
   {
@@ -168,15 +169,14 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
           <div className="flex items-center justify-between px-5 h-14">
 
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <Landmark size={16} strokeWidth={1.5} color="#2D6A4F" />
-              <span
-                className="text-[17px] font-semibold tracking-tight"
-                style={{ color: '#1A1916' }}
-              >
-                SAJDA
-              </span>
-            </div>
+            <Image
+              src="/sajda-logo.png"
+              alt="SAJDA"
+              width={80}
+              height={32}
+              className="object-contain"
+              priority
+            />
 
             {/* Mosque switcher pill */}
             {hasFollowed && (
@@ -211,12 +211,20 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
 
             {/* Akses Pantas */}
             <div className="px-5 mt-6 md:px-0">
-              <p
-                className="text-[12px] font-medium uppercase tracking-[0.05em] mb-3"
-                style={{ color: '#A8A49E' }}
-              >
-                Akses Pantas
-              </p>
+              <div className="flex items-center justify-between mb-3">
+                <p
+                  className="text-[12px] font-medium uppercase tracking-[0.05em]"
+                  style={{ color: '#A8A49E' }}
+                >
+                  Akses Pantas
+                </p>
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full"
+                  style={{ color: '#A8A49E', background: '#F0EEE9' }}
+                >
+                  8 Alat
+                </span>
+              </div>
               <div className="grid grid-cols-4 gap-2.5 md:gap-3">
                 {QUICK_ACTIONS.map((action) => (
                   <a

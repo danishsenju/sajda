@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { AppShell } from '@/components/ui/AppShell'
+import { MasjidContent } from '@/components/masjid/MasjidContent'
 
 export const metadata = { title: 'Masjid' }
 
@@ -9,16 +9,21 @@ export default async function MasjidPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  return (
-    <AppShell title="Masjid">
-      <div className="px-4 py-6 md:px-0">
-        <h1 className="text-xl font-semibold mb-1" style={{ color: 'var(--text)' }}>
-          Cari Masjid
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--text-dim)' }}>
-          Segera hadir — carian & profil masjid.
-        </p>
-      </div>
-    </AppShell>
-  )
+  /* ── Followed mosques for the Diikuti section ── */
+  const { data: follows } = await (supabase as any)
+    .from('jemaah_follows')
+    .select('mosque_id, mosques(id, name, theme_color)')
+    .eq('user_id', user.id)
+
+  const followed = ((follows ?? []) as any[])
+    .map((f: any) => f.mosques)
+    .filter(Boolean)
+    .map((m: any, i: number) => ({
+      id: m.id,
+      name: m.name,
+      initials: m.name.charAt(0).toUpperCase(),
+      color: m.theme_color ?? ['#2D6A4F', '#C9A84C', '#4B6CB7'][i % 3],
+    }))
+
+  return <MasjidContent followedMosques={followed.length > 0 ? followed : undefined} />
 }

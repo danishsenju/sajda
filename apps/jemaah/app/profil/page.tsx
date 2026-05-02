@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { AppShell } from '@/components/ui/AppShell'
+import { ProfilContent } from '@/components/profil/ProfilContent'
 
 export const metadata = { title: 'Profil' }
 
@@ -9,16 +9,26 @@ export default async function ProfilPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  /* ── Mosque count ── */
+  const { count: mosqueCount } = await (supabase as any)
+    .from('jemaah_follows')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  /* ── Doa count ── */
+  const { count: doaCount } = await (supabase as any)
+    .from('doa')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
   return (
-    <AppShell title="Profil">
-      <div className="px-4 py-6 md:px-0">
-        <h1 className="text-xl font-semibold mb-1" style={{ color: 'var(--text)' }}>
-          Profil Saya
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--text-dim)' }}>
-          {user.email}
-        </p>
-      </div>
-    </AppShell>
+    <ProfilContent
+      email={user.email ?? ''}
+      name={user.user_metadata?.display_name ?? user.user_metadata?.full_name}
+      joinedAt={user.created_at}
+      mosqueCount={mosqueCount ?? 0}
+      doaCount={doaCount ?? 0}
+      streak={0}
+    />
   )
 }
