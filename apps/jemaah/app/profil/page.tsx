@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ProfilContent } from '@/components/profil/ProfilContent'
+import { getSolatStreak } from '@/app/actions/solat'
 
 export const metadata = { title: 'Profil' }
 
@@ -21,6 +22,9 @@ export default async function ProfilPage() {
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
 
+  /* ── Solat streak ── */
+  const { currentStreak } = await getSolatStreak()
+
   return (
     <ProfilContent
       email={user.email ?? ''}
@@ -28,7 +32,7 @@ export default async function ProfilPage() {
       joinedAt={user.created_at}
       mosqueCount={mosqueCount ?? 0}
       doaCount={doaCount ?? 0}
-      streak={0}
+      streak={currentStreak}
     />
   )
 }

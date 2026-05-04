@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { saveQuranBookmark } from '@/app/actions/quran'
+import { saveQuranBookmark, getQuranBookmark } from '@/app/actions/quran'
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
@@ -136,7 +136,8 @@ export function QuranPageReader({ initialPage = 1 }: { initialPage?: number }) {
   const [loading, setLoading]     = useState(true)
   const [error, setError]         = useState(false)
   const [direction, setDirection] = useState(0)
-  const [bookmarked, setBm]       = useState(false)
+  const [savedBookmarkPage, setSavedBookmarkPage] = useState<number | null>(null)
+  const bookmarked = savedBookmarkPage === page
   const [goToOpen, setGoTo]       = useState(false)
 
   const touchX = useRef<number | null>(null)
@@ -181,24 +182,25 @@ export function QuranPageReader({ initialPage = 1 }: { initialPage?: number }) {
 
   useEffect(() => { fetchPage(page) }, [page, fetchPage])
 
+  useEffect(() => {
+    getQuranBookmark().then(bm => setSavedBookmarkPage(bm?.page_number ?? null)).catch(() => {})
+  }, [])
+
   /* ── Navigation ── */
   function goNext() {
     if (page >= 604) return
     setDirection(1)
-    setBm(false)
     setPage(p => p + 1)
   }
 
   function goPrev() {
     if (page <= 1) return
     setDirection(-1)
-    setBm(false)
     setPage(p => p - 1)
   }
 
   function goTo(p: number) {
     setDirection(p > page ? 1 : -1)
-    setBm(false)
     setPage(p)
   }
 
@@ -224,8 +226,7 @@ export function QuranPageReader({ initialPage = 1 }: { initialPage?: number }) {
       pageNumber: page,
       verseKey: verses[0]?.verse_key,
     })
-    setBm(true)
-    setTimeout(() => setBm(false), 2000)
+    setSavedBookmarkPage(page)
   }
 
   /* ── Header info ── */
@@ -345,7 +346,7 @@ export function QuranPageReader({ initialPage = 1 }: { initialPage?: number }) {
               <div className="px-4 pb-4 md:px-0">
                 {(() => {
                   let prevChapter = -1
-                  return verses.map((v, i) => {
+                  return verses.map((v) => {
                     const showHeader = v.chapter_id !== prevChapter
                     if (showHeader) prevChapter = v.chapter_id
 

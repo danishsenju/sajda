@@ -42,7 +42,7 @@ export default async function DoaPage() {
   /* ── Doa wishes (newest first) ────────────────────────────────────── */
   const { data: rawWishes } = await supabase
     .from('doa_wishes')
-    .select('id, doa_text, is_anonymous, author_name, created_at, mosque_id, masjid(name, theme)')
+    .select('id, doa_text, is_anonymous, author_name, created_at, mosque_id, category, masjid(name, theme)')
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(30)
@@ -93,6 +93,7 @@ export default async function DoaPage() {
       userHasAamined: myAaminedSet.has(w.id),
       commentCount: commentCountMap[w.id] ?? 0,
       createdAt: w.created_at,
+      category: w.category ?? 'umum',
     }
   })
 

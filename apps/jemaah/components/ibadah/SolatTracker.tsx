@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { logSolat, removeSolatLog } from '@/app/actions/solat'
 
 /* ─── Types & constants ──────────────────────────────────────────────────── */
 
@@ -154,9 +155,15 @@ export function SolatTracker() {
       const todayLog: DayLog = prev[today] ?? {
         subuh: false, zohor: false, asar: false, maghrib: false, isyak: false,
       }
-      const updated = { ...prev, [today]: { ...todayLog, [prayerKey]: !todayLog[prayerKey] } }
+      const isNowDone = !todayLog[prayerKey]
+      const updated = { ...prev, [today]: { ...todayLog, [prayerKey]: isNowDone } }
       saveLog(updated)
       setStreak(calcStreak(updated))
+      if (isNowDone) {
+        logSolat(prayerKey, false).catch(() => {})
+      } else {
+        removeSolatLog(prayerKey).catch(() => {})
+      }
       return updated
     })
   }

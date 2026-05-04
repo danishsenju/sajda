@@ -61,14 +61,18 @@ const NAV = [
     ),
   },
   {
-    href: '/komuniti',
-    label: 'Komuniti',
+    href: '/doa',
+    label: 'Doa',
     icon: (active: boolean) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-        <circle cx="9" cy="7" r="3" stroke={active ? 'var(--accent)' : '#A8A49E'} strokeWidth="1.7" />
-        <circle cx="17" cy="9" r="2.5" stroke={active ? 'var(--accent)' : '#A8A49E'} strokeWidth="1.7" />
-        <path d="M3 20C3 17.24 5.69 15 9 15C10.07 15 11.07 15.27 11.93 15.73" stroke={active ? 'var(--accent)' : '#A8A49E'} strokeWidth="1.7" strokeLinecap="round" />
-        <path d="M13 20C13 17.79 14.79 16 17 16C19.21 16 21 17.79 21 20" stroke={active ? 'var(--accent)' : '#A8A49E'} strokeWidth="1.7" strokeLinecap="round" />
+        <path
+          d="M12 3C12 3 6 7 6 13C6 16.31 8.69 19 12 19C15.31 19 18 16.31 18 13C18 7 12 3 12 3Z"
+          fill={active ? 'var(--accent)' : 'none'}
+          stroke={active ? 'var(--accent)' : '#A8A49E'}
+          strokeWidth="1.7"
+          strokeLinejoin="round"
+        />
+        <path d="M9 21H15M12 19V21" stroke={active ? 'var(--accent)' : '#A8A49E'} strokeWidth="1.7" strokeLinecap="round" />
       </svg>
     ),
   },

@@ -31,10 +31,12 @@ export async function postDoa({
   doaText,
   isAnonymous,
   mosqueId,
+  category,
 }: {
   doaText: string
   isAnonymous: boolean
   mosqueId: string | null
+  category: string
 }): Promise<{ id: string; authorName: string | null } | { error: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -59,6 +61,7 @@ export async function postDoa({
       is_anonymous: isAnonymous,
       author_name: authorName,
       mosque_id: mosqueId,
+      category,
     })
     .select('id')
     .single()

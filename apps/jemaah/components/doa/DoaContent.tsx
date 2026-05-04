@@ -22,6 +22,7 @@ export type DoaWishItem = {
   userHasAamined: boolean
   commentCount: number
   createdAt: string
+  category: string
 }
 
 type Props = {
@@ -310,19 +311,15 @@ function DoaWishCard({
   wish,
   index,
   onAaminUpdate,
-  onCommentCountChange,
 }: {
   wish: DoaWishItem
   index: number
   onAaminUpdate: (id: string, delta: number, newState: boolean) => void
-  onCommentCountChange: (id: string, delta: number) => void
 }) {
   const [hasAamined, setHasAamined] = useState(wish.userHasAamined)
   const [aaminCount, setAaminCount] = useState(wish.aaminCount)
-  const [commentCount, setCommentCount] = useState(wish.commentCount)
   const [burst, setBurst] = useState(false)
   const [expanded, setExpanded] = useState(false)
-  const [showComments, setShowComments] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const displayName = wish.isAnonymous ? 'Hamba Allah' : (wish.authorName ?? 'Jemaah')
@@ -351,11 +348,6 @@ function DoaWishCard({
         onAaminUpdate(wish.id, -delta, !nextState)
       }
     })
-  }
-
-  function handleCommentCountChange(delta: number) {
-    setCommentCount((c) => c + delta)
-    onCommentCountChange(wish.id, delta)
   }
 
   return (
@@ -420,6 +412,22 @@ function DoaWishCard({
             </span>
           )}
         </div>
+
+        {/* ── Category badge ────────────────────────────────────────── */}
+        {(() => {
+          const cat = DOA_CATEGORIES.find((c) => c.value === wish.category)
+          if (!cat) return null
+          return (
+            <div className="mb-2.5">
+              <span
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold"
+                style={{ background: '#EAF4EE', color: '#2D6A4F' }}
+              >
+                {cat.icon} {cat.label}
+              </span>
+            </div>
+          )
+        })()}
 
         {/* ── Doa text ──────────────────────────────────────────────── */}
         <button
@@ -500,52 +508,8 @@ function DoaWishCard({
             </motion.button>
           </div>
 
-          {/* Divider */}
-          <div className="w-px h-5 flex-shrink-0" style={{ background: 'var(--border)' }} />
-
-          {/* Comment button */}
-          <button
-            onClick={() => setShowComments((v) => !v)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl flex-1 justify-center transition-colors"
-            style={{
-              background: showComments ? '#EAF4EE' : 'transparent',
-              color: showComments ? '#2D6A4F' : 'var(--text-dim)',
-            }}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-[13px] font-semibold">
-              {commentCount > 0 ? formatCount(commentCount) : ''} Komen
-            </span>
-          </button>
         </div>
       </div>
-
-      {/* ── Comments section (lazy-expanded) ──────────────────────── */}
-      <AnimatePresence>
-        {showComments && (
-          <motion.div
-            key="comments"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            style={{ overflow: 'hidden' }}
-          >
-            <CommentsSection
-              doaWishId={wish.id}
-              onCountChange={handleCommentCountChange}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   )
 }
@@ -553,6 +517,20 @@ function DoaWishCard({
 /* ─── PostDoaSheet ───────────────────────────────────────────────────────── */
 
 const MAX_CHARS = 300
+
+const DOA_CATEGORIES = [
+  { value: 'kesihatan', label: 'Kesihatan', icon: '🤲' },
+  { value: 'keluarga', label: 'Keluarga', icon: '👨‍👩‍👧' },
+  { value: 'pekerjaan', label: 'Pekerjaan', icon: '💼' },
+  { value: 'pelajaran', label: 'Pelajaran', icon: '📖' },
+  { value: 'kekuatan_iman', label: 'Kekuatan Iman', icon: '☪️' },
+  { value: 'jodoh', label: 'Jodoh', icon: '💚' },
+  { value: 'keselamatan', label: 'Keselamatan', icon: '🛡️' },
+  { value: 'ummah', label: 'Ummah', icon: '🕌' },
+  { value: 'umum', label: 'Umum', icon: '🤍' },
+] as const
+
+type DoaCategory = typeof DOA_CATEGORIES[number]['value']
 
 function PostDoaSheet({
   open,
@@ -567,8 +545,10 @@ function PostDoaSheet({
 }) {
   const primaryMosque = mosques.find((m) => m.is_primary) ?? mosques[0] ?? null
 
+  const [step, setStep] = useState<'category' | 'write'>('category')
+  const [selectedCategory, setSelectedCategory] = useState<DoaCategory>('umum')
   const [text, setText] = useState('')
-  const [isAnonymous, setIsAnonymous] = useState(false)
+  const [isAnonymous, setIsAnonymous] = useState(true)
   const [selectedMosqueId, setSelectedMosqueId] = useState<string | null>(primaryMosque?.id ?? null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -579,9 +559,17 @@ function PostDoaSheet({
   const hasProfanity = trimmedLength > 0 && containsProfanity(text)
   const canSubmit = trimmedLength >= MIN_CHARS && !isPending && !hasProfanity
 
+  const selectedCategoryObj = DOA_CATEGORIES.find((c) => c.value === selectedCategory)
+
   function handleClose() {
     if (isPending) return
+    setStep('category')
     onClose()
+  }
+
+  function handleSelectCategory(cat: DoaCategory) {
+    setSelectedCategory(cat)
+    setStep('write')
   }
 
   function handleSubmit() {
@@ -589,7 +577,7 @@ function PostDoaSheet({
     setError(null)
 
     startTransition(async () => {
-      const result = await postDoa({ doaText: text, isAnonymous, mosqueId: selectedMosqueId })
+      const result = await postDoa({ doaText: text, isAnonymous, mosqueId: selectedMosqueId, category: selectedCategory })
 
       if ('error' in result) {
         setError(result.error)
@@ -609,11 +597,13 @@ function PostDoaSheet({
         userHasAamined: false,
         commentCount: 0,
         createdAt: new Date().toISOString(),
+        category: selectedCategory,
       })
 
       setText('')
-      setIsAnonymous(false)
+      setIsAnonymous(true)
       setSelectedMosqueId(primaryMosque?.id ?? null)
+      setStep('category')
     })
   }
 
@@ -644,18 +634,34 @@ function PostDoaSheet({
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
-              <div>
+            <div className="flex items-center gap-2 px-5 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+              {step === 'write' ? (
+                <button
+                  onClick={() => setStep('category')}
+                  className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0"
+                  style={{ background: 'var(--surface-3)' }}
+                  aria-label="Kembali"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 12H5M11 6l-6 6 6 6" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              ) : (
+                <div className="w-9 h-9 flex-shrink-0" />
+              )}
+
+              <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold leading-tight" style={{ color: 'var(--text)', fontFamily: 'var(--font-playfair)' }}>
-                  Tulis Doa
+                  {step === 'category' ? 'Pilih Kategori' : 'Tulis Doa'}
                 </h3>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-dim)' }}>
-                  Doa anda akan dikongsi kepada semua jemaah SAJDA
+                  {step === 'category' ? 'Pilih jenis doa anda' : 'Doa anda akan dikongsi kepada semua jemaah SAJDA'}
                 </p>
               </div>
+
               <button
                 onClick={handleClose}
-                className="w-9 h-9 flex items-center justify-center rounded-full"
+                className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0"
                 style={{ background: 'var(--surface-3)' }}
                 aria-label="Tutup"
               >
@@ -667,140 +673,178 @@ function PostDoaSheet({
 
             {/* Body */}
             <div className="px-5 py-5 flex flex-col gap-4">
-              {/* Textarea */}
-              <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-dim)' }}>
-                  Doa anda
-                </label>
-                <textarea
-                  value={text}
-                  onChange={(e) => { setText(e.target.value.slice(0, MAX_CHARS)); setError(null) }}
-                  placeholder="Tuliskan doa anda dengan penuh ikhlas..."
-                  rows={5}
-                  className="w-full resize-none rounded-xl px-4 py-3.5 text-sm outline-none transition-all"
-                  style={{
-                    background: 'var(--surface)',
-                    color: 'var(--text)',
-                    border: `1.5px solid ${hasProfanity ? 'var(--error)' : 'var(--border)'}`,
-                    fontFamily: 'var(--font-jakarta)',
-                    lineHeight: '1.7',
-                  }}
-                  // eslint-disable-next-line jsx-a11y/no-autofocus
-                  autoFocus
-                />
-                <div className="flex justify-between items-center mt-1.5 px-1">
-                  {hasProfanity ? (
-                    <p className="text-[11px]" style={{ color: 'var(--error)' }}>{PROFANITY_ERROR_MSG}</p>
-                  ) : error ? (
-                    <p className="text-[11px]" style={{ color: 'var(--error)' }}>{error}</p>
-                  ) : trimmedLength > 0 && trimmedLength < MIN_CHARS ? (
-                    <p className="text-[11px]" style={{ color: 'var(--warning)' }}>
-                      Minimum {MIN_CHARS} huruf ({MIN_CHARS - trimmedLength} lagi)
-                    </p>
-                  ) : (
-                    <span />
-                  )}
-                  <p
-                    className="text-[11px] font-medium tabular-nums"
-                    style={{ color: charsLeft < 30 ? 'var(--warning)' : 'var(--text-dim)' }}
-                  >
-                    {text.length}/{MAX_CHARS}
-                  </p>
-                </div>
-              </div>
-
-              {/* Anonymous toggle */}
-              <div
-                className="flex items-center justify-between py-3.5 px-4 rounded-xl"
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-              >
-                <div className="flex-1 min-w-0 mr-3">
-                  <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Tunjuk nama saya</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-dim)' }}>
-                    {isAnonymous ? 'Dipapar sebagai "Hamba Allah"' : 'Nama anda akan kelihatan'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setIsAnonymous((v) => !v)}
-                  className="relative w-11 h-6 rounded-full flex-shrink-0 transition-colors"
-                  style={{
-                    background: !isAnonymous
-                      ? 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)'
-                      : 'var(--border-strong)',
-                  }}
-                  aria-checked={!isAnonymous}
-                  role="switch"
-                >
-                  <motion.div
-                    animate={{ x: !isAnonymous ? 20 : 2 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className="absolute top-1 w-4 h-4 rounded-full"
-                    style={{ background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.25)' }}
-                  />
-                </button>
-              </div>
-
-              {/* Mosque selector */}
-              {mosques.length > 0 && (
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest mb-2.5 px-1" style={{ color: 'var(--text-dim)' }}>
-                    Masjid
-                  </p>
-                  <div className="flex gap-2 flex-wrap">
+              {step === 'category' ? (
+                /* ── Step 1: Category grid ── */
+                <div className="grid grid-cols-3 gap-2.5">
+                  {DOA_CATEGORIES.map((cat) => (
                     <button
-                      onClick={() => setSelectedMosqueId(null)}
-                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all"
-                      style={
-                        selectedMosqueId === null
-                          ? { background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', color: '#fff', boxShadow: '0 2px 8px rgba(27,67,50,0.25)' }
-                          : { background: 'var(--surface-3)', color: 'var(--text-muted)' }
-                      }
+                      key={cat.value}
+                      onClick={() => handleSelectCategory(cat.value)}
+                      className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all"
+                      style={{
+                        background: selectedCategory === cat.value ? '#EAF4EE' : 'var(--surface)',
+                        border: `1.5px solid ${selectedCategory === cat.value ? '#2D6A4F' : 'var(--border)'}`,
+                      }}
                     >
-                      Tiada
+                      <span style={{ fontSize: 24 }}>{cat.icon}</span>
+                      <span className="text-[11px] font-semibold text-center leading-tight px-1" style={{ color: 'var(--text)' }}>
+                        {cat.label}
+                      </span>
                     </button>
-                    {mosques.map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => setSelectedMosqueId(m.id)}
-                        className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all"
-                        style={
-                          selectedMosqueId === m.id
-                            ? { background: m.theme.primary, color: '#fff', boxShadow: `0 2px 8px ${m.theme.primary}40` }
-                            : { background: 'var(--surface-3)', color: 'var(--text-muted)' }
-                        }
-                      >
-                        {m.name}
-                      </button>
-                    ))}
-                  </div>
+                  ))}
                 </div>
-              )}
+              ) : (
+                /* ── Step 2: Write doa ── */
+                <>
+                  {/* Selected category badge */}
+                  {selectedCategoryObj && (
+                    <div>
+                      <span
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                        style={{ background: '#EAF4EE', color: '#2D6A4F', border: '1px solid #B7DFCA' }}
+                      >
+                        <span>{selectedCategoryObj.icon}</span>
+                        {selectedCategoryObj.label}
+                      </span>
+                    </div>
+                  )}
 
-              {/* Submit */}
-              <motion.button
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                whileTap={canSubmit ? { scale: 0.97 } : {}}
-                className="w-full py-4 rounded-xl text-sm font-semibold transition-all"
-                style={
-                  canSubmit
-                    ? { background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', color: '#fff', boxShadow: '0 4px 20px rgba(27,67,50,0.30)' }
-                    : { background: 'var(--surface-3)', color: 'var(--text-dim)' }
-                }
-              >
-                {isPending ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <motion.span
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full inline-block"
+                  {/* Textarea */}
+                  <div>
+                    <label className="block text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-dim)' }}>
+                      Doa anda
+                    </label>
+                    <textarea
+                      value={text}
+                      onChange={(e) => { setText(e.target.value.slice(0, MAX_CHARS)); setError(null) }}
+                      placeholder="Tuliskan doa anda dengan penuh ikhlas..."
+                      rows={5}
+                      className="w-full resize-none rounded-xl px-4 py-3.5 text-sm outline-none transition-all"
+                      style={{
+                        background: 'var(--surface)',
+                        color: 'var(--text)',
+                        border: `1.5px solid ${hasProfanity ? 'var(--error)' : 'var(--border)'}`,
+                        fontFamily: 'var(--font-jakarta)',
+                        lineHeight: '1.7',
+                      }}
+                      // eslint-disable-next-line jsx-a11y/no-autofocus
+                      autoFocus
                     />
-                    Menghantar...
-                  </span>
-                ) : (
-                  'Hantar Doa'
-                )}
-              </motion.button>
+                    <div className="flex justify-between items-center mt-1.5 px-1">
+                      {hasProfanity ? (
+                        <p className="text-[11px]" style={{ color: 'var(--error)' }}>{PROFANITY_ERROR_MSG}</p>
+                      ) : error ? (
+                        <p className="text-[11px]" style={{ color: 'var(--error)' }}>{error}</p>
+                      ) : trimmedLength > 0 && trimmedLength < MIN_CHARS ? (
+                        <p className="text-[11px]" style={{ color: 'var(--warning)' }}>
+                          Minimum {MIN_CHARS} huruf ({MIN_CHARS - trimmedLength} lagi)
+                        </p>
+                      ) : (
+                        <span />
+                      )}
+                      <p
+                        className="text-[11px] font-medium tabular-nums"
+                        style={{ color: charsLeft < 30 ? 'var(--warning)' : 'var(--text-dim)' }}
+                      >
+                        {text.length}/{MAX_CHARS}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Anonymous toggle */}
+                  <div
+                    className="flex items-center justify-between py-3.5 px-4 rounded-xl"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                  >
+                    <div className="flex-1 min-w-0 mr-3">
+                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Tunjuk nama saya</p>
+                      <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-dim)' }}>
+                        {isAnonymous ? 'Dipapar sebagai "Hamba Allah"' : 'Nama anda akan kelihatan'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsAnonymous((v) => !v)}
+                      className="relative w-11 h-6 rounded-full flex-shrink-0 transition-colors"
+                      style={{
+                        background: !isAnonymous
+                          ? 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)'
+                          : 'var(--border-strong)',
+                      }}
+                      aria-checked={!isAnonymous}
+                      role="switch"
+                    >
+                      <motion.div
+                        animate={{ x: !isAnonymous ? 20 : 2 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        className="absolute top-1 w-4 h-4 rounded-full"
+                        style={{ background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.25)' }}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Mosque selector */}
+                  {mosques.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest mb-2.5 px-1" style={{ color: 'var(--text-dim)' }}>
+                        Masjid
+                      </p>
+                      <div className="flex gap-2 flex-wrap">
+                        <button
+                          onClick={() => setSelectedMosqueId(null)}
+                          className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all"
+                          style={
+                            selectedMosqueId === null
+                              ? { background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', color: '#fff', boxShadow: '0 2px 8px rgba(27,67,50,0.25)' }
+                              : { background: 'var(--surface-3)', color: 'var(--text-muted)' }
+                          }
+                        >
+                          Tiada
+                        </button>
+                        {mosques.map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => setSelectedMosqueId(m.id)}
+                            className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all"
+                            style={
+                              selectedMosqueId === m.id
+                                ? { background: m.theme.primary, color: '#fff', boxShadow: `0 2px 8px ${m.theme.primary}40` }
+                                : { background: 'var(--surface-3)', color: 'var(--text-muted)' }
+                            }
+                          >
+                            {m.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Submit */}
+                  <motion.button
+                    onClick={handleSubmit}
+                    disabled={!canSubmit}
+                    whileTap={canSubmit ? { scale: 0.97 } : {}}
+                    className="w-full py-4 rounded-xl text-sm font-semibold transition-all"
+                    style={
+                      canSubmit
+                        ? { background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', color: '#fff', boxShadow: '0 4px 20px rgba(27,67,50,0.30)' }
+                        : { background: 'var(--surface-3)', color: 'var(--text-dim)' }
+                    }
+                  >
+                    {isPending ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <motion.span
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                          className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full inline-block"
+                        />
+                        Menghantar...
+                      </span>
+                    ) : (
+                      'Hantar Doa'
+                    )}
+                  </motion.button>
+                </>
+              )}
             </div>
           </motion.div>
         </>
@@ -823,12 +867,6 @@ export function DoaContent({ mosques, wishes: initialWishes }: Props) {
   function handleAaminUpdate(id: string, delta: number, newState: boolean) {
     setWishes((prev) =>
       prev.map((w) => w.id === id ? { ...w, aaminCount: w.aaminCount + delta, userHasAamined: newState } : w)
-    )
-  }
-
-  function handleCommentCountChange(id: string, delta: number) {
-    setWishes((prev) =>
-      prev.map((w) => w.id === id ? { ...w, commentCount: w.commentCount + delta } : w)
     )
   }
 
@@ -941,7 +979,6 @@ export function DoaContent({ mosques, wishes: initialWishes }: Props) {
                   wish={wish}
                   index={i}
                   onAaminUpdate={handleAaminUpdate}
-                  onCommentCountChange={handleCommentCountChange}
                 />
               ))}
             </div>

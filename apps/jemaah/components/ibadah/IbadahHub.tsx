@@ -7,6 +7,8 @@ import { BottomNav } from '@/components/ui/BottomNav'
 import { Sidebar } from '@/components/ui/Sidebar'
 import Image from 'next/image'
 import { Bell } from 'lucide-react'
+import { getSolatStreak } from '@/app/actions/solat'
+import { getQuranBookmark } from '@/app/actions/quran'
 
 /* ─── Tool card data ─────────────────────────────────────────────────────── */
 
@@ -126,24 +128,36 @@ type Props = {
 
 export function IbadahHub({ nextPrayer, ibadahDone = 6, ibadahTotal = 8 }: Props) {
   const [prayer, setPrayer] = useState(nextPrayer ?? { label: 'Asar', time: '16:32' })
+  const [solatStreak, setSolatStreak] = useState(0)
+  const [showTasbihResume, setShowTasbihResume] = useState(false)
+  const [showQuranResume, setShowQuranResume] = useState(false)
   const remaining = ibadahTotal - ibadahDone
 
   useEffect(() => {
-    if (nextPrayer) return
-    try {
-      const cached = JSON.parse(localStorage.getItem('sajda_prayer_times_banner') ?? '{}')
-      if (Array.isArray(cached.prayers)) {
-        const now = new Date()
-        const cur = now.getHours() * 60 + now.getMinutes()
-        for (const p of cached.prayers) {
-          const [h, m] = p.time.split(':').map(Number)
-          if (h! * 60 + m! > cur) {
-            setPrayer({ label: p.label, time: p.time })
-            break
+    if (!nextPrayer) {
+      try {
+        const cached = JSON.parse(localStorage.getItem('sajda_prayer_times_banner') ?? '{}')
+        if (Array.isArray(cached.prayers)) {
+          const now = new Date()
+          const cur = now.getHours() * 60 + now.getMinutes()
+          for (const p of cached.prayers) {
+            const [h, m] = p.time.split(':').map(Number)
+            if (h! * 60 + m! > cur) {
+              setPrayer({ label: p.label, time: p.time })
+              break
+            }
           }
         }
-      }
+      } catch {}
+    }
+
+    try {
+      const tasbih = JSON.parse(localStorage.getItem('sajda_tasbih') ?? 'null')
+      setShowTasbihResume((tasbih?.sessions ?? 0) > 0)
     } catch {}
+
+    getSolatStreak().then(({ currentStreak }) => setSolatStreak(currentStreak)).catch(() => {})
+    getQuranBookmark().then((bm) => setShowQuranResume(bm !== null)).catch(() => {})
   }, [nextPrayer])
 
   return (
@@ -202,7 +216,19 @@ export function IbadahHub({ nextPrayer, ibadahDone = 6, ibadahTotal = 8 }: Props
 
             {/* Tool cards grid */}
             <div className="grid grid-cols-2 gap-3">
-              {TOOLS.map((tool, i) => (
+              {TOOLS.map((tool, i) => {
+                let sub = tool.sub
+                let badge = tool.badge
+                let resumeLabel = tool.resumeLabel
+                if (tool.href === '/ibadah/solat') {
+                  sub = `${solatStreak} hari`
+                  badge = String(solatStreak)
+                } else if (tool.href === '/ibadah/tasbih') {
+                  resumeLabel = showTasbihResume ? 'SAMBUNG' : null
+                } else if (tool.href === '/ibadah/quran') {
+                  resumeLabel = showQuranResume ? 'SAMBUNG' : null
+                }
+                return (
                 <motion.a
                   key={tool.href}
                   href={tool.href}
@@ -221,27 +247,28 @@ export function IbadahHub({ nextPrayer, ibadahDone = 6, ibadahTotal = 8 }: Props
                   </div>
 
                   {/* Badge top-right */}
-                  {tool.badge && (
+                  {badge && (
                     <span
                       className="absolute top-4 right-4 text-[13px] font-bold"
-                      style={{ color: tool.badgeColor, fontFamily: tool.badge.match(/[؀-ۿ]/) ? 'var(--font-amiri)' : undefined }}
+                      style={{ color: tool.badgeColor, fontFamily: badge.match(/[؀-ۿ]/) ? 'var(--font-amiri)' : undefined }}
                     >
-                      {tool.badge}
+                      {badge}
                     </span>
                   )}
 
                   {/* Label + sub */}
                   <p className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>{tool.label}</p>
-                  <p className="text-[12px]" style={{ color: '#A8A49E' }}>{tool.sub}</p>
+                  <p className="text-[12px]" style={{ color: '#A8A49E' }}>{sub}</p>
 
                   {/* Resume link */}
-                  {tool.resumeLabel && (
+                  {resumeLabel && (
                     <p className="text-[11px] font-semibold mt-1" style={{ color: '#2D6A4F' }}>
-                      ▶ {tool.resumeLabel}
+                      ▶ {resumeLabel}
                     </p>
                   )}
                 </motion.a>
-              ))}
+                )
+              })}
             </div>
 
           </div>
