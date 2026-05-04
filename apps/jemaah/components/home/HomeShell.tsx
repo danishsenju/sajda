@@ -15,15 +15,17 @@ import Image from 'next/image'
 import {
   Bell,
   Landmark,
-  Compass,
-  BookOpen,
-  Zap,
-  AlignLeft,
   Clock,
   ListChecks,
-  MessageSquare,
   ChevronRight,
+  MessageSquare,
 } from 'lucide-react'
+import { TasbihIcon } from '@/components/icons/tasbih-icon'
+import { QiblaIcon } from '@/components/icons/qibla-icon'
+import { QuranIcon } from '@/components/icons/quran-icon'
+import { SolatStreakIcon } from '@/components/icons/solat-streak-icon'
+import { HadisIcon } from '@/components/icons/hadis-icon'
+import { TazkirahIcon } from '@/components/icons/tazkirah-icon'
 
 /* ─── Quick actions ──────────────────────────────────────────────────────── */
 
@@ -31,33 +33,27 @@ const QUICK_ACTIONS = [
   {
     href: '/ibadah/tasbih',
     label: 'Tasbih',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2D6A4F" strokeWidth="1.5" strokeLinecap="round">
-        <circle cx="12" cy="12" r="3" />
-        <circle cx="12" cy="12" r="8" strokeDasharray="3 2.5" />
-        <circle cx="12" cy="4" r="1" fill="#2D6A4F" stroke="none" />
-      </svg>
-    ),
+    icon: <TasbihIcon size={22} className="text-[#2D6A4F]" />,
   },
   {
     href: '/ibadah/qibla',
     label: 'Qiblat',
-    icon: <Compass size={22} strokeWidth={1.5} color="#2D6A4F" />,
+    icon: <QiblaIcon size={22} className="text-[#2D6A4F]" />,
   },
   {
     href: '/ibadah/quran',
     label: 'Al-Quran',
-    icon: <BookOpen size={22} strokeWidth={1.5} color="#2D6A4F" />,
+    icon: <QuranIcon size={22} className="text-[#2D6A4F]" />,
   },
   {
     href: '/ibadah/solat',
     label: 'Streak',
-    icon: <Zap size={22} strokeWidth={1.5} color="#2D6A4F" />,
+    icon: <SolatStreakIcon size={22} className="text-[#2D6A4F]" />,
   },
   {
     href: '/ibadah/hadis',
     label: 'Hadis',
-    icon: <AlignLeft size={22} strokeWidth={1.5} color="#2D6A4F" />,
+    icon: <HadisIcon size={22} className="text-[#2D6A4F]" />,
   },
   {
     href: '/ibadah/mathurat',
@@ -72,7 +68,7 @@ const QUICK_ACTIONS = [
   {
     href: '/ibadah/tazkirah',
     label: 'Tazkirah',
-    icon: <MessageSquare size={22} strokeWidth={1.5} color="#2D6A4F" />,
+    icon: <TazkirahIcon size={22} className="text-[#2D6A4F]" />,
   },
 ]
 
@@ -309,7 +305,7 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                   className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: '#EAF4EE' }}
                 >
-                  <BookOpen size={16} strokeWidth={1.5} color="#2D6A4F" />
+                  <QuranIcon size={16} className="text-[#2D6A4F]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>

@@ -20,6 +20,14 @@ const LS_KEY = 'sajda_prayer_times_banner'
 
 /* ─── Arabic duas per prayer ─────────────────────────────────────────────── */
 
+const PRAYER_IMAGES: Record<string, string> = {
+  subuh:   '/subuh-image-top.png',
+  zohor:   '/zohorasar-image-top.png',
+  asar:    '/zohorasar-image-top.png',
+  maghrib: '/maghrib-image-top.png',
+  isyak:   '/isha-image-top.png',
+}
+
 const PRAYER_DUA: Record<string, string> = {
   subuh:   'اللَّهُمَّ بَارِكْ لَنَا فِي صَبَاحِنَا',
   zohor:   'اللَّهُمَّ بَارِكْ لَنَا فِي ظُهْرِنَا',
@@ -182,7 +190,11 @@ export function PrayerBanner() {
       {/* ── Hero section ────────────────────────────────────────────── */}
       <div
         className="relative px-5 pt-5 pb-5"
-        style={{ background: '#6D2B3D' }}
+        style={{
+          backgroundImage: `url(${PRAYER_IMAGES[prayer.name] ?? '/subuh-image-top.png'})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center',
+        }}
       >
         <StarPattern />
 

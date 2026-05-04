@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Compass, BookOpen, Zap, AlignLeft, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
+import { TasbihIcon } from '@/components/icons/tasbih-icon'
+import { QiblaIcon } from '@/components/icons/qibla-icon'
+import { QuranIcon } from '@/components/icons/quran-icon'
+import { SolatStreakIcon } from '@/components/icons/solat-streak-icon'
+import { HadisIcon } from '@/components/icons/hadis-icon'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { Sidebar } from '@/components/ui/Sidebar'
 import Image from 'next/image'
@@ -21,13 +26,7 @@ const TOOLS = [
     resumeLabel: 'SAMBUNG',
     color: '#EAF4EE',
     iconColor: '#2D6A4F',
-    icon: () => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2D6A4F" strokeWidth="1.5" strokeLinecap="round">
-        <circle cx="12" cy="12" r="3" />
-        <circle cx="12" cy="12" r="8" strokeDasharray="3 2.5" />
-        <circle cx="12" cy="4" r="1.2" fill="#2D6A4F" stroke="none" />
-      </svg>
-    ),
+    icon: () => <TasbihIcon size={24} className="text-[#2D6A4F]" />,
     badgeColor: '#2D6A4F',
   },
   {
@@ -38,7 +37,7 @@ const TOOLS = [
     resumeLabel: null,
     color: '#F0F4FF',
     iconColor: '#4B6CB7',
-    icon: () => <Compass size={24} strokeWidth={1.5} color="#4B6CB7" />,
+    icon: () => <QiblaIcon size={24} className="text-[#4B6CB7]" />,
     badgeColor: '#4B6CB7',
   },
   {
@@ -49,7 +48,7 @@ const TOOLS = [
     resumeLabel: 'SAMBUNG',
     color: '#FFF8EE',
     iconColor: '#C9A84C',
-    icon: () => <BookOpen size={24} strokeWidth={1.5} color="#C9A84C" />,
+    icon: () => <QuranIcon size={24} className="text-[#C9A84C]" />,
     badgeColor: '#C9A84C',
   },
   {
@@ -60,7 +59,7 @@ const TOOLS = [
     resumeLabel: null,
     color: '#FFF3F5',
     iconColor: '#C0392B',
-    icon: () => <Zap size={24} strokeWidth={1.5} color="#C0392B" />,
+    icon: () => <SolatStreakIcon size={24} className="text-[#C0392B]" />,
     badgeColor: '#C0392B',
   },
   {
@@ -71,7 +70,7 @@ const TOOLS = [
     resumeLabel: null,
     color: '#F5F0FF',
     iconColor: '#7B5EA7',
-    icon: () => <AlignLeft size={24} strokeWidth={1.5} color="#7B5EA7" />,
+    icon: () => <HadisIcon size={24} className="text-[#7B5EA7]" />,
     badgeColor: '#7B5EA7',
   },
   {
