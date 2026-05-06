@@ -9,29 +9,50 @@
 - Delight is in the details: micro-animations, haptics, transitions.
 - Addictive ≠ manipulative. Addictive = genuinely valuable, fast to return to.
 
-## SAJDA Design Language: "Sacred Futurism"
-- **Feeling**: Spiritual depth meets modern clarity. Like a masjid that was designed in 2040.
+## SAJDA Design Language: "Layla wa Nahar" (ليلى والنهار)
+- **Feeling**: Deep night-sky serenity. Like performing Tahajjud in a masjid lit only by stars.
 - **NOT**: Generic Islamic pattern overload. Not gold-on-green cliché.
-- **IS**: Dark backgrounds with warm accent light. Geometric precision. Breathing space.
+- **IS**: Deep indigo darkness, forest-green depth, violet-mist accents, gold highlights. Breathing space.
 
-### Tokens
+### Palette (use ONLY these 6 colors + white for body text)
 ```
-Primary:    #1B4332 (deep forest — trust, nature, Islam)
-Accent:     #D4AF37 (warm gold — sacred, premium)
-Surface:    #0F1923 (near-black — depth, night prayer feel)
-Surface2:   #1A2634 (elevated surface)
-Text:       #F5F0E8 (warm white — easier on eyes for night readers)
-TextMuted:  #8899AA
-Success:    #2ECC71
-Warning:    #F39C12
-Error:      #E74C3C
+#0C0C14  — Deep Indigo   → page background (darkest)
+#1A1A2E  — Dark Navy     → cards, panels, surface-2
+#1E3828  — Forest Green  → accent surfaces, success, surface-3, borders
+#A67CC5  — Violet Mist   → primary brand, muted text, interactive elements
+#6B8FD4  — Periwinkle    → secondary accent, dim text, links
+#C9A84C  — Gold          → warning, hover states, highlights, CTA emphasis
+```
+
+### Token Map
+```
+Surface:         #0C0C14  (page bg)
+Surface-2:       #1A1A2E  (cards)
+Surface-3:       #1E3828  (elevated / green-tinted areas)
+Text:            #FFFFFF  (body — white for contrast on dark bg)
+Text-muted:      #A67CC5  (violet — secondary labels, captions)
+Text-dim:        #6B8FD4  (periwinkle — placeholders, timestamps)
+Primary:         #A67CC5  (violet — brand, buttons, active states)
+Accent:          #1E3828  (forest green — accent bg, tags)
+Accent-2:        #6B8FD4  (periwinkle — secondary buttons, icons)
+Border:          #1A1A2E  (subtle separator)
+Border-strong:   #1E3828  (green-tinted emphasis border)
+Success:         #1E3828  (forest green)
+Warning:         #C9A84C  (gold)
+Error:           #C0392B  (red — only exception, semantic necessity)
 ```
 
 ### Typography
-- **Display**: Playfair Display (for Arabic-adjacent headings, Surah names)
+- **Display**: Cormorant Garamond (elegant serif — night-sky Islamic aesthetic, headings, Surah names)
 - **Body**: Plus Jakarta Sans (modern, clean, great for Malay/English)
-- **Arabic**: Amiri or Scheherazade New — never system Arabic font
+- **Arabic**: Amiri — never system Arabic font
 - Scale: 12 / 14 / 16 / 20 / 24 / 32 / 40
+
+### Contrast Rules (text must never tenggelam)
+- Body text (#FFFFFF) on any surface: always ≥ 10:1 contrast ✓
+- Muted text (#A67CC5) on #0C0C14: ~6:1 contrast ✓
+- Dim text (#6B8FD4) on #0C0C14: ~4.5:1 contrast ✓
+- Never use #1A1A2E or #1E3828 as text on dark backgrounds
 
 ### Spacing System
 4px base. Scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64

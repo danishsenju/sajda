@@ -11,7 +11,7 @@ import type { FollowedMosque } from './MosqueSwitcher'
 import type { FeedItem } from './FeedCard'
 import type { TazkirahItem } from '@/app/actions/tazkirah'
 import type { QuranBookmark } from '@/app/actions/quran'
-import Image from 'next/image'
+import { SajdaLogo } from '@/components/icons/sajda-logo'
 import {
   Bell,
   Landmark,
@@ -33,42 +33,42 @@ const QUICK_ACTIONS = [
   {
     href: '/ibadah/tasbih',
     label: 'Tasbih',
-    icon: <TasbihIcon size={22} className="text-[#2D6A4F]" />,
+    icon: <TasbihIcon size={22} className="text-[var(--accent-2)]" />,
   },
   {
     href: '/ibadah/qibla',
     label: 'Qiblat',
-    icon: <QiblaIcon size={22} className="text-[#2D6A4F]" />,
+    icon: <QiblaIcon size={22} className="text-[var(--accent-2)]" />,
   },
   {
     href: '/ibadah/quran',
     label: 'Al-Quran',
-    icon: <QuranIcon size={22} className="text-[#2D6A4F]" />,
+    icon: <QuranIcon size={22} className="text-[var(--accent-2)]" />,
   },
   {
     href: '/ibadah/solat',
     label: 'Streak',
-    icon: <SolatStreakIcon size={22} className="text-[#2D6A4F]" />,
+    icon: <SolatStreakIcon size={22} className="text-[var(--accent-2)]" />,
   },
   {
     href: '/ibadah/hadis',
     label: 'Hadis',
-    icon: <HadisIcon size={22} className="text-[#2D6A4F]" />,
+    icon: <HadisIcon size={22} className="text-[var(--accent-2)]" />,
   },
   {
     href: '/ibadah/mathurat',
     label: 'Mathurat',
-    icon: <Clock size={22} strokeWidth={1.5} color="#2D6A4F" />,
+    icon: <Clock size={22} strokeWidth={1.5} color="var(--accent-2)" />,
   },
   {
     href: '/ibadah/checklist',
     label: 'Senarai',
-    icon: <ListChecks size={22} strokeWidth={1.5} color="#2D6A4F" />,
+    icon: <ListChecks size={22} strokeWidth={1.5} color="var(--accent-2)" />,
   },
   {
     href: '/ibadah/tazkirah',
     label: 'Tazkirah',
-    icon: <TazkirahIcon size={22} className="text-[#2D6A4F]" />,
+    icon: <TazkirahIcon size={22} className="text-[var(--accent-2)]" />,
   },
 ]
 
@@ -84,7 +84,7 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 const LS_KEY = 'sajda_active_mosque_id'
-const DEFAULT_ACCENT = '#2D6A4F'
+const DEFAULT_ACCENT = '#1E3828'
 
 /* ─── Props ──────────────────────────────────────────────────────────────── */
 
@@ -145,7 +145,7 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
   const selectedMosque = mosques.find((m) => m.id === selectedMosqueId)
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#F7F6F3' }}>
+    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
 
       {/* ── Desktop sidebar ────────────────────────────────────────── */}
       <Sidebar
@@ -160,19 +160,12 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
         {/* ── Mobile header ─────────────────────────────────────────── */}
         <header
           className="md:hidden sticky top-0 z-30 safe-top"
-          style={{ background: '#FFFFFF', borderBottom: 'none' }}
+          style={{ background: 'var(--surface-2)', borderBottom: 'none' }}
         >
           <div className="flex items-center justify-between px-5 h-14">
 
             {/* Logo */}
-            <Image
-              src="/sajda-logo.png"
-              alt="SAJDA"
-              width={80}
-              height={32}
-              className="object-contain"
-              priority
-            />
+            <SajdaLogo width={80} height={34} className="text-[var(--text)]" />
 
             {/* Mosque switcher pill */}
             {hasFollowed && (
@@ -189,10 +182,10 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
               className="w-11 h-11 flex items-center justify-center rounded-full relative"
               aria-label="Pemberitahuan"
             >
-              <Bell size={20} strokeWidth={1.5} color="#1A1916" />
+              <Bell size={20} strokeWidth={1.5} color="var(--text)" />
               <span
                 className="absolute top-2 right-2 w-2 h-2 rounded-full"
-                style={{ background: '#C0392B', border: '1.5px solid #FFFFFF' }}
+                style={{ background: 'var(--error)', border: '1.5px solid var(--surface-2)' }}
               />
             </button>
           </div>
@@ -208,35 +201,59 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
             {/* Akses Pantas */}
             <div className="px-5 mt-6 md:px-0">
               <div className="flex items-center justify-between mb-3">
-                <p
-                  className="text-[12px] font-medium uppercase tracking-[0.05em]"
-                  style={{ color: '#A8A49E' }}
-                >
-                  Akses Pantas
-                </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 rounded-full" style={{ background: 'linear-gradient(180deg, #C9A84C, rgba(201,168,76,0.3))' }} />
+                  <p
+                    className="text-[12px] font-semibold uppercase tracking-[0.08em]"
+                    style={{ color: 'rgba(255,255,255,0.55)' }}
+                  >
+                    Akses Pantas
+                  </p>
+                </div>
                 <span
-                  className="text-[11px] font-semibold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full"
-                  style={{ color: '#A8A49E', background: '#F0EEE9' }}
+                  className="text-[10px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full"
+                  style={{
+                    color: 'rgba(201,168,76,0.8)',
+                    background: 'rgba(201,168,76,0.08)',
+                    border: '1px solid rgba(201,168,76,0.15)',
+                  }}
                 >
                   8 Alat
                 </span>
               </div>
-              <div className="grid grid-cols-4 gap-2.5 md:gap-3">
+              <div className="grid grid-cols-4 gap-2 md:gap-3">
                 {QUICK_ACTIONS.map((action) => (
                   <a
                     key={action.href}
                     href={action.href}
-                    className="flex flex-col items-center gap-2 py-3.5 px-2 rounded-[14px] transition-colors active:scale-[0.97]"
+                    className="relative flex flex-col items-center gap-2.5 py-4 px-2 rounded-[18px] transition-all duration-200 active:scale-[0.94] overflow-hidden"
                     style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #E8E5DF',
-                      minHeight: '44px',
+                      background: 'linear-gradient(160deg, #1C1C32 0%, #13131E 100%)',
+                      border: '1px solid rgba(107,143,212,0.14)',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
                     }}
                   >
-                    {action.icon}
+                    {/* Gold shimmer top line */}
+                    <div
+                      className="absolute inset-x-0 top-0 h-px"
+                      style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(201,168,76,0.55) 50%, transparent 95%)' }}
+                    />
+
+                    {/* Icon glow container */}
+                    <div
+                      className="w-11 h-11 rounded-[13px] flex items-center justify-center"
+                      style={{
+                        background: 'linear-gradient(145deg, rgba(107,143,212,0.16) 0%, rgba(107,143,212,0.05) 100%)',
+                        border: '1px solid rgba(107,143,212,0.2)',
+                        boxShadow: '0 0 14px rgba(107,143,212,0.1), inset 0 1px 0 rgba(255,255,255,0.07)',
+                      }}
+                    >
+                      {action.icon}
+                    </div>
+
                     <span
-                      className="text-[12px] font-medium text-center leading-tight"
-                      style={{ color: '#6B6860' }}
+                      className="text-[11px] font-semibold text-center leading-tight tracking-[0.02em]"
+                      style={{ color: 'rgba(255,255,255,0.6)' }}
                     >
                       {action.label}
                     </span>
@@ -251,19 +268,19 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                 href="/ibadah/tazkirah"
                 className="block mx-5 mt-5 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform md:mx-0"
                 style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E8E5DF',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--border-strong)',
                 }}
               >
                 <div
                   className="px-4 py-3 flex items-center justify-between"
-                  style={{ borderBottom: '1px solid #E8E5DF' }}
+                  style={{ borderBottom: '1px solid var(--border)' }}
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#2D6A4F' }} />
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--warning)' }} />
                     <span
                       className="text-[12px] font-medium uppercase tracking-[0.05em]"
-                      style={{ color: '#A8A49E' }}
+                      style={{ color: 'var(--text-dim)' }}
                     >
                       Tazkirah Hari Ini
                     </span>
@@ -271,7 +288,7 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                   {tazkirah.category && (
                     <span
                       className="text-[11px] font-medium px-2.5 py-1 rounded-full"
-                      style={{ background: '#EAF4EE', color: '#2D6A4F' }}
+                      style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}
                     >
                       {tazkirah.category}
                     </span>
@@ -280,13 +297,13 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                 <div className="px-4 py-4">
                   <p
                     className="text-[16px] font-semibold mb-1.5 leading-snug"
-                    style={{ color: '#1A1916' }}
+                    style={{ color: 'var(--text)' }}
                   >
                     {tazkirah.title}
                   </p>
                   <p
                     className="text-[14px] leading-relaxed line-clamp-2"
-                    style={{ color: '#6B6860' }}
+                    style={{ color: 'var(--text-muted)' }}
                   >
                     {tazkirah.content_malay}
                   </p>
@@ -299,23 +316,23 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
               <a
                 href={`/ibadah/quran?page=${quranBookmark.page_number}`}
                 className="mx-5 mt-3 flex items-center gap-3 px-4 py-3.5 rounded-2xl active:scale-[0.98] transition-transform md:mx-0"
-                style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)' }}
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: '#EAF4EE' }}
+                  style={{ background: 'var(--surface-3)' }}
                 >
-                  <QuranIcon size={16} className="text-[#2D6A4F]" />
+                  <QuranIcon size={16} className="text-[var(--accent-2)]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>
+                  <p className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>
                     Teruskan Membaca
                   </p>
-                  <p className="text-[12px]" style={{ color: '#A8A49E' }}>
+                  <p className="text-[12px]" style={{ color: 'var(--text-dim)' }}>
                     Al-Quran · Halaman {quranBookmark.page_number}
                   </p>
                 </div>
-                <ChevronRight size={16} strokeWidth={1.5} color="#A8A49E" />
+                <ChevronRight size={16} strokeWidth={1.5} color="var(--text-dim)" />
               </a>
             )}
 
@@ -323,30 +340,30 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
             {!hasFollowed ? (
               <div
                 className="mx-5 mt-5 md:mx-0 rounded-2xl p-6 text-center"
-                style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+                style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)' }}
               >
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
-                  style={{ background: '#EAF4EE' }}
+                  style={{ background: 'var(--surface-3)' }}
                 >
-                  <Landmark size={22} strokeWidth={1.5} color="#2D6A4F" />
+                  <Landmark size={22} strokeWidth={1.5} color="var(--accent-2)" />
                 </div>
                 <p
                   className="text-[16px] font-semibold mb-2"
-                  style={{ color: '#1A1916' }}
+                  style={{ color: 'var(--text)' }}
                 >
                   Ikuti masjid anda
                 </p>
                 <p
                   className="text-[14px] mb-5 leading-relaxed"
-                  style={{ color: '#6B6860' }}
+                  style={{ color: 'var(--text-muted)' }}
                 >
                   Dapatkan siaran, program dan jadual masjid terus di sini.
                 </p>
                 <a
                   href="/masjid"
                   className="flex items-center justify-center w-full h-12 rounded-xl text-[15px] font-semibold transition-all active:scale-95"
-                  style={{ background: '#2D6A4F', color: '#FFFFFF' }}
+                  style={{ background: 'var(--primary)', color: 'var(--surface)' }}
                 >
                   Cari Masjid
                 </a>
@@ -358,18 +375,18 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                   <div>
                     <p
                       className="text-[12px] font-medium uppercase tracking-[0.05em] mb-0.5"
-                      style={{ color: '#A8A49E' }}
+                      style={{ color: 'var(--text-dim)' }}
                     >
                       Siaran Masjid
                     </p>
-                    <h2 className="text-[15px] font-semibold" style={{ color: '#1A1916' }}>
+                    <h2 className="text-[15px] font-semibold" style={{ color: 'var(--text)' }}>
                       {selectedMosque?.name ?? 'Semua Masjid'}
                     </h2>
                   </div>
                   {visibleFeed.length > 0 && (
                     <span
                       className="text-[12px] px-2.5 py-1 rounded-full font-medium"
-                      style={{ background: '#F0EEE9', color: '#6B6860' }}
+                      style={{ background: 'var(--surface-3)', color: 'var(--text-dim)' }}
                     >
                       {visibleFeed.length} siaran
                     </span>
@@ -386,11 +403,11 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                     >
                       <div
                         className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
-                        style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+                        style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)' }}
                       >
-                        <MessageSquare size={20} strokeWidth={1.5} color="#A8A49E" />
+                        <MessageSquare size={20} strokeWidth={1.5} color="var(--text-dim)" />
                       </div>
-                      <p className="text-[14px] font-medium" style={{ color: '#6B6860' }}>
+                      <p className="text-[14px] font-medium" style={{ color: 'var(--text-muted)' }}>
                         Tiada siaran dari masjid ini lagi.
                       </p>
                     </motion.div>
@@ -410,11 +427,11 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
 
                 {visibleFeed.length > 0 && (
                   <div className="flex items-center justify-center gap-3 py-8">
-                    <div className="h-px w-10" style={{ background: '#E8E5DF' }} />
-                    <span className="text-[12px]" style={{ color: '#A8A49E' }}>
+                    <div className="h-px w-10" style={{ background: 'var(--border-strong)' }} />
+                    <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>
                       Itu sahaja buat masa ini
                     </span>
-                    <div className="h-px w-10" style={{ background: '#E8E5DF' }} />
+                    <div className="h-px w-10" style={{ background: 'var(--border-strong)' }} />
                   </div>
                 )}
               </>

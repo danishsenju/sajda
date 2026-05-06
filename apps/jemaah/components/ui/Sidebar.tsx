@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { SajdaLogo } from '@/components/icons/sajda-logo'
 import { MosqueSwitcher } from '@/components/home/MosqueSwitcher'
 import type { FollowedMosque } from '@/components/home/MosqueSwitcher'
 
@@ -107,14 +107,7 @@ export function Sidebar({ mosques, selectedId, onMosqueSelect }: Props) {
         className="flex items-center px-5 h-16 flex-shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
-        <Image
-          src="/sajda-logo.png"
-          alt="SAJDA"
-          width={100}
-          height={40}
-          className="object-contain"
-          priority
-        />
+        <SajdaLogo width={100} height={42} className="text-[var(--text)]" />
       </div>
 
       {/* ── Mosque Switcher ──────────────────────────────────────────── */}

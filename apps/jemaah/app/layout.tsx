@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Plus_Jakarta_Sans, Playfair_Display, Amiri } from 'next/font/google'
+import { Plus_Jakarta_Sans, Cormorant_Garamond, Amiri } from 'next/font/google'
 import './globals.css'
 
 const jakarta = Plus_Jakarta_Sans({
@@ -9,10 +9,10 @@ const jakarta = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
-const playfair = Playfair_Display({
-  variable: '--font-playfair',
+const cormorant = Cormorant_Garamond({
+  variable: '--font-cormorant',
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 })
 
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#FFFFFF',
+  themeColor: '#0C0C14',
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="ms"
-      className={`${jakarta.variable} ${playfair.variable} ${amiri.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${cormorant.variable} ${amiri.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-surface text-foreground">
         {children}

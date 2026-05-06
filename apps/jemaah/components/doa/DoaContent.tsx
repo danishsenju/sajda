@@ -86,8 +86,8 @@ function CommentItem({
       <div
         className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold"
         style={{
-          background: comment.isAnonymous ? '#F0EEE9' : '#EAF4EE',
-          color: comment.isAnonymous ? '#A8A49E' : '#2D6A4F',
+          background: 'var(--surface-3)',
+          color: 'var(--text-dim)',
           fontSize: comment.isAnonymous ? 12 : 10,
         }}
       >
@@ -98,7 +98,7 @@ function CommentItem({
       <div className="flex-1 min-w-0">
         <div
           className="inline-block px-3 py-2 rounded-2xl rounded-tl-sm max-w-full"
-          style={{ background: '#F0EEE9' }}
+          style={{ background: 'var(--surface-2)' }}
         >
           <span
             className="text-[12px] font-semibold mr-1.5"
@@ -219,7 +219,7 @@ function CommentsSection({
       {loading ? (
         <div className="flex gap-2 py-1">
           {[1, 2].map((i) => (
-            <div key={i} className="h-3 rounded-full animate-pulse" style={{ width: i === 1 ? 80 : 120, background: '#E8E5DF' }} />
+            <div key={i} className="h-3 rounded-full animate-pulse" style={{ width: i === 1 ? 80 : 120, background: 'var(--border-strong)' }} />
           ))}
         </div>
       ) : (
@@ -246,11 +246,11 @@ function CommentsSection({
       <div className="flex items-center gap-2">
         <div
           className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold"
-          style={{ background: '#EAF4EE', color: '#2D6A4F' }}
+          style={{ background: 'var(--surface-3)', color: 'var(--text-dim)' }}
         >
           &bull;
         </div>
-        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-full" style={{ background: '#F0EEE9' }}>
+        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-full" style={{ background: 'var(--surface-2)' }}>
           <input
             ref={inputRef}
             value={commentText}
@@ -275,7 +275,7 @@ function CommentsSection({
                 onClick={handleSubmit}
                 disabled={submitting}
                 className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)' }}
+                style={{ background: 'var(--primary)' }}
                 aria-label="Hantar komen"
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
@@ -357,13 +357,14 @@ function DoaWishCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.35, delay: index * 0.04, ease: 'easeOut' }}
-      className="rounded-2xl overflow-hidden bg-white"
+      className="rounded-2xl overflow-hidden"
       style={{
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(45,106,79,0.07), 0 0 0 1px rgba(0,0,0,0.04)',
+        background: 'var(--surface-2)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 6px 24px rgba(0,0,0,0.16), 0 0 0 1px rgba(255,255,255,0.04)',
       }}
     >
       {/* Top accent line */}
-      <div className="h-0.5 w-full" style={{ background: 'linear-gradient(90deg, #2D6A4F 0%, #52B788 60%, transparent 100%)' }} />
+      <div className="h-0.5 w-full" style={{ background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent-2) 60%, transparent 100%)' }} />
 
       <div className="px-4 pt-4 pb-0">
         {/* ── Header ───────────────────────────────────────────────── */}
@@ -373,7 +374,7 @@ function DoaWishCard({
             className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 font-semibold"
             style={
               wish.isAnonymous
-                ? { background: '#F0EEE9', color: '#A8A49E', fontSize: 16 }
+                ? { background: 'var(--surface-3)', color: 'var(--text-dim)', fontSize: 16 }
                 : {
                     background: `linear-gradient(135deg, ${wish.mosqueColor} 0%, ${wish.mosqueColor}bb 100%)`,
                     color: '#fff',
@@ -421,7 +422,7 @@ function DoaWishCard({
             <div className="mb-2.5">
               <span
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold"
-                style={{ background: '#EAF4EE', color: '#2D6A4F' }}
+                style={{ background: 'var(--surface-3)', color: 'var(--text)' }}
               >
                 {cat.icon} {cat.label}
               </span>
@@ -435,10 +436,10 @@ function DoaWishCard({
           className="w-full text-left mb-3"
           aria-expanded={expanded}
         >
-          <div className="relative px-4 py-3.5 rounded-xl" style={{ background: '#F7F6F3' }}>
+          <div className="relative px-4 py-3.5 rounded-xl" style={{ background: 'var(--surface)' }}>
             <span
               className="absolute top-1.5 left-3 leading-none select-none pointer-events-none"
-              style={{ fontFamily: 'var(--font-playfair)', fontSize: 36, color: '#2D6A4F', opacity: 0.12, lineHeight: 1 }}
+              style={{ fontFamily: 'var(--font-playfair)', fontSize: 36, color: 'var(--primary)', opacity: 0.20, lineHeight: 1 }}
             >
               &ldquo;
             </span>
@@ -472,7 +473,7 @@ function DoaWishCard({
                   animate={{ scale: 2.5, opacity: 0 }}
                   exit={{}}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
-                  style={{ background: 'rgba(45,106,79,0.25)' }}
+                  style={{ background: 'rgba(166,124,197,0.25)' }}
                 />
               )}
             </AnimatePresence>
@@ -483,8 +484,8 @@ function DoaWishCard({
               animate={burst ? { scale: [1, 1.12, 1] } : { scale: 1 }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl w-full justify-center transition-colors relative z-[1]"
               style={{
-                background: hasAamined ? '#EAF4EE' : 'transparent',
-                color: hasAamined ? '#2D6A4F' : 'var(--text-dim)',
+                background: hasAamined ? 'var(--surface-3)' : 'transparent',
+                color: hasAamined ? 'var(--primary)' : 'var(--text-dim)',
               }}
               aria-label="Aamiin"
               aria-pressed={hasAamined}
@@ -622,7 +623,7 @@ function PostDoaSheet({
 
           <motion.div
             className="fixed bottom-0 left-0 right-0 z-[55] rounded-t-3xl safe-bottom overflow-hidden md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[480px] md:rounded-2xl"
-            style={{ background: '#FFFFFF', boxShadow: '0 -8px 40px rgba(0,0,0,0.12)' }}
+            style={{ background: 'var(--surface-2)', boxShadow: '0 -8px 40px rgba(0,0,0,0.40)' }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -630,7 +631,7 @@ function PostDoaSheet({
           >
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-1 md:hidden">
-              <div className="w-10 h-1 rounded-full" style={{ background: '#D5D0C9' }} />
+              <div className="w-10 h-1 rounded-full" style={{ background: 'var(--border-strong)' }} />
             </div>
 
             {/* Header */}
@@ -682,8 +683,8 @@ function PostDoaSheet({
                       onClick={() => handleSelectCategory(cat.value)}
                       className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all"
                       style={{
-                        background: selectedCategory === cat.value ? '#EAF4EE' : 'var(--surface)',
-                        border: `1.5px solid ${selectedCategory === cat.value ? '#2D6A4F' : 'var(--border)'}`,
+                        background: selectedCategory === cat.value ? 'var(--surface-3)' : 'var(--surface)',
+                        border: `1.5px solid ${selectedCategory === cat.value ? 'var(--primary)' : 'var(--border)'}`,
                       }}
                     >
                       <span style={{ fontSize: 24 }}>{cat.icon}</span>
@@ -701,7 +702,7 @@ function PostDoaSheet({
                     <div>
                       <span
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                        style={{ background: '#EAF4EE', color: '#2D6A4F', border: '1px solid #B7DFCA' }}
+                        style={{ background: 'var(--surface-3)', color: 'var(--text)', border: '1px solid var(--border-strong)' }}
                       >
                         <span>{selectedCategoryObj.icon}</span>
                         {selectedCategoryObj.label}
@@ -767,7 +768,7 @@ function PostDoaSheet({
                       className="relative w-11 h-6 rounded-full flex-shrink-0 transition-colors"
                       style={{
                         background: !isAnonymous
-                          ? 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)'
+                          ? 'var(--primary)'
                           : 'var(--border-strong)',
                       }}
                       aria-checked={!isAnonymous}
@@ -794,7 +795,7 @@ function PostDoaSheet({
                           className="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all"
                           style={
                             selectedMosqueId === null
-                              ? { background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', color: '#fff', boxShadow: '0 2px 8px rgba(27,67,50,0.25)' }
+                              ? { background: 'var(--primary)', color: '#fff', boxShadow: '0 2px 8px rgba(166,124,197,0.30)' }
                               : { background: 'var(--surface-3)', color: 'var(--text-muted)' }
                           }
                         >
@@ -826,7 +827,7 @@ function PostDoaSheet({
                     className="w-full py-4 rounded-xl text-sm font-semibold transition-all"
                     style={
                       canSubmit
-                        ? { background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', color: '#fff', boxShadow: '0 4px 20px rgba(27,67,50,0.30)' }
+                        ? { background: 'var(--primary)', color: '#fff', boxShadow: '0 4px 20px rgba(166,124,197,0.30)' }
                         : { background: 'var(--surface-3)', color: 'var(--text-dim)' }
                     }
                   >
@@ -914,7 +915,7 @@ export function DoaContent({ mosques, wishes: initialWishes }: Props) {
             className="flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all"
             style={
               selectedMosqueId === null
-                ? { background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', color: '#fff', boxShadow: '0 2px 10px rgba(27,67,50,0.25)' }
+                ? { background: 'var(--primary)', color: '#fff', boxShadow: '0 2px 10px rgba(166,124,197,0.30)' }
                 : { background: 'var(--surface-2)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
             }
           >
@@ -950,11 +951,11 @@ export function DoaContent({ mosques, wishes: initialWishes }: Props) {
             >
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
-                style={{ background: 'linear-gradient(135deg, #EAF4EE 0%, #C7E6D4 100%)', boxShadow: '0 4px 16px rgba(45,106,79,0.12)' }}
+                style={{ background: 'var(--surface-3)', boxShadow: '0 4px 16px rgba(0,0,0,0.20)' }}
               >
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
                   <path d="M9 11V6a1 1 0 012 0v5M9 11V9a1 1 0 012 0v2M11 11V8a1 1 0 012 0v3M13 11V9a1 1 0 012 0v6c0 2.21-1.79 4-4 4s-4-1.79-4-4v-3a1 1 0 012 0"
-                    stroke="#2D6A4F" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    stroke="var(--primary)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <p className="text-base font-semibold mb-1" style={{ color: 'var(--text)', fontFamily: 'var(--font-playfair)' }}>
@@ -966,7 +967,7 @@ export function DoaContent({ mosques, wishes: initialWishes }: Props) {
               <button
                 onClick={() => setShowPostSheet(true)}
                 className="px-6 py-3 rounded-xl text-sm font-semibold"
-                style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)', color: '#fff', boxShadow: '0 4px 16px rgba(27,67,50,0.25)' }}
+                style={{ background: 'var(--primary)', color: '#fff', boxShadow: '0 4px 16px rgba(166,124,197,0.30)' }}
               >
                 Tulis Doa Pertama
               </button>
@@ -1003,8 +1004,8 @@ export function DoaContent({ mosques, wishes: initialWishes }: Props) {
         whileHover={{ scale: 1.05 }}
         className="fixed bottom-[88px] right-5 z-40 flex items-center gap-2.5 pl-4 pr-5 h-14 rounded-full md:bottom-8"
         style={{
-          background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
-          boxShadow: '0 6px 24px rgba(27,67,50,0.40), 0 2px 8px rgba(0,0,0,0.12)',
+          background: 'var(--primary)',
+          boxShadow: '0 6px 24px rgba(166,124,197,0.40), 0 2px 8px rgba(0,0,0,0.20)',
         }}
         aria-label="Tulis doa baru"
       >

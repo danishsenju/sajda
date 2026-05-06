@@ -235,7 +235,7 @@ export function QiblaCompass() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
-              style={{ background: '#dcfce7', color: '#16a34a' }}
+              style={{ background: 'rgba(22,163,74,0.15)', color: '#4ade80' }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M5 13L9 17L19 7" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />

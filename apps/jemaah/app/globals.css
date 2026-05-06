@@ -2,36 +2,36 @@
 
 /* ─── SAJDA Design Tokens ─────────────────────────────────────────────────── */
 :root {
-  /* Backgrounds */
-  --surface:        #F7F6F3;
-  --surface-2:      #FFFFFF;
-  --surface-3:      #F0EEE9;
+  /* Backgrounds — Layla wa Nahar */
+  --surface:        #0C0C14;
+  --surface-2:      #1A1A2E;
+  --surface-3:      #1E3828;
 
-  /* Text */
-  --text:           #1A1916;
-  --text-muted:     #6B6860;
-  --text-dim:       #A8A49E;
+  /* Text — white on dark, palette colors for hierarchy */
+  --text:           #FFFFFF;
+  --text-muted:     #A67CC5;
+  --text-dim:       #6B8FD4;
 
   /* Brand / Accent */
-  --primary:        #1A1916;
-  --accent:         #2D6A4F;
-  --accent-2:       #52B788;
-  --accent-surface: #EAF4EE;
-  --accent-border:  #C7E6D4;
+  --primary:        #A67CC5;
+  --accent:         #1E3828;
+  --accent-2:       #6B8FD4;
+  --accent-surface: #1E3828;
+  --accent-border:  #1E3828;
 
   /* Legacy aliases kept for dynamic mosque theming */
-  --accent-soft:    #EAF4EE;
-  --accent-hover:   #235540;
-  --primary-soft:   #2D6A4F;
+  --accent-soft:    #1E3828;
+  --accent-hover:   #C9A84C;
+  --primary-soft:   #1A1A2E;
 
   /* Borders */
-  --border:         #E8E5DF;
-  --border-strong:  #D5D0C9;
-  --border-accent:  #C7E6D4;
+  --border:         #1A1A2E;
+  --border-strong:  #1E3828;
+  --border-accent:  #1E3828;
 
   /* Semantic */
-  --success:        #2a9d6e;
-  --warning:        #e9a84c;
+  --success:        #1E3828;
+  --warning:        #C9A84C;
   --error:          #C0392B;
   --danger:         #C0392B;
 }
@@ -54,7 +54,7 @@
   --color-border:         var(--border);
   --color-border-accent:  var(--border-accent);
   --font-sans:            var(--font-jakarta);
-  --font-display:         var(--font-playfair);
+  --font-display:         var(--font-cormorant);
   --font-arabic:          var(--font-amiri);
   --radius-card:          16px;
   --radius-btn:           12px;

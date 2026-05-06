@@ -26,7 +26,7 @@ export function TazkirahHarian({ data }: { data: TazkirahItem | null }) {
     )
   }
 
-  const accentColor = data.color ?? '#102937'
+  const accentColor = data.color ?? '#A67CC5'
 
   return (
     <motion.div

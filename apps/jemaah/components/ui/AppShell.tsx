@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { SajdaLogo } from '@/components/icons/sajda-logo'
 import { Bell } from 'lucide-react'
 import { BottomNav } from './BottomNav'
 
@@ -131,7 +131,7 @@ export function AppShell({ title, children }: Props) {
           </div>
           <span
             className="text-xl font-bold"
-            style={{ color: 'var(--primary)', fontFamily: 'var(--font-playfair)', letterSpacing: '0.1em' }}
+            style={{ color: 'var(--primary)', fontFamily: 'var(--font-cormorant)', letterSpacing: '0.1em' }}
           >
             SAJDA
           </span>
@@ -182,20 +182,13 @@ export function AppShell({ title, children }: Props) {
         {/* Mobile header */}
         <header
           className="md:hidden sticky top-0 z-30 safe-top"
-          style={{ background: '#FFFFFF', borderBottom: '1px solid #E8E5DF' }}
+          style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}
         >
           <div className="flex items-center justify-between px-5 h-14">
-            <Image
-              src="/sajda-logo.png"
-              alt="SAJDA"
-              width={80}
-              height={32}
-              className="object-contain"
-              priority
-            />
+            <SajdaLogo width={80} height={34} className="text-[var(--text)]" />
             <span
               className="text-[13px] font-semibold"
-              style={{ color: '#1A1916' }}
+              style={{ color: 'var(--text)' }}
             >
               {title}
             </span>
@@ -203,7 +196,7 @@ export function AppShell({ title, children }: Props) {
               className="w-11 h-11 flex items-center justify-center rounded-full relative"
               aria-label="Pemberitahuan"
             >
-              <Bell size={20} strokeWidth={1.5} color="#1A1916" />
+              <Bell size={20} strokeWidth={1.5} color="var(--text)" />
             </button>
           </div>
         </header>

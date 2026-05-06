@@ -127,20 +127,20 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#F7F6F3' }}>
+    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
       <Sidebar mosques={[]} selectedId={null} onMosqueSelect={() => {}} />
 
       <div className="flex-1 flex flex-col md:ml-[240px]">
         {/* Mobile header */}
         <header
           className="md:hidden sticky top-0 z-30 safe-top"
-          style={{ background: '#FFFFFF', borderBottom: '1px solid #E8E5DF' }}
+          style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}
         >
           <div className="flex items-center justify-between px-5 h-14">
             <Image src="/sajda-logo.png" alt="SAJDA" width={80} height={32} className="object-contain" priority />
-            <span className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>Masjid</span>
+            <span className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>Masjid</span>
             <button className="w-11 h-11 flex items-center justify-center" aria-label="Pemberitahuan">
-              <Bell size={20} strokeWidth={1.5} color="#1A1916" />
+              <Bell size={20} strokeWidth={1.5} color="var(--text)" />
             </button>
           </div>
         </header>
@@ -149,12 +149,12 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
           <div className="px-5 pt-6 md:max-w-[900px] md:mx-auto md:px-8 md:py-6">
 
             {/* Page heading */}
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1" style={{ color: '#C9A84C' }}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1" style={{ color: 'var(--warning)' }}>
               Masjid
             </p>
             <h1
               className="text-[26px] font-bold leading-tight mb-5"
-              style={{ color: '#1A1916', fontFamily: 'var(--font-playfair)' }}
+              style={{ color: 'var(--text)', fontFamily: 'var(--font-playfair)' }}
             >
               Temui rumah Allah<br />berdekatan anda
             </h1>
@@ -162,20 +162,20 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
             {/* Search bar */}
             <div
               className="flex items-center gap-3 px-4 h-12 rounded-2xl mb-4"
-              style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
             >
-              <Search size={16} strokeWidth={1.5} color="#A8A49E" />
+              <Search size={16} strokeWidth={1.5} color="var(--text-dim)" />
               <input
                 type="text"
                 placeholder="Cari masjid berdekatan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 text-[14px] bg-transparent outline-none"
-                style={{ color: '#1A1916' }}
+                style={{ color: 'var(--text)' }}
               />
               <button
                 className="flex items-center gap-1 text-[12px] font-semibold"
-                style={{ color: '#2D6A4F' }}
+                style={{ color: 'var(--primary)' }}
               >
                 <MapPin size={12} strokeWidth={2} />
                 Lokasi
@@ -191,8 +191,8 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
                   className="px-4 py-2 rounded-full text-[13px] font-semibold transition-colors"
                   style={
                     activeTab === tab
-                      ? { background: '#1A1916', color: '#FFFFFF' }
-                      : { background: '#FFFFFF', color: '#6B6860', border: '1px solid #E8E5DF' }
+                      ? { background: 'var(--primary)', color: '#FFFFFF' }
+                      : { background: 'var(--surface-2)', color: 'var(--text-dim)', border: '1px solid var(--border)' }
                   }
                 >
                   {tab}
@@ -209,15 +209,15 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
             {followedMosques.length > 0 && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>Diikuti</p>
-                  <span className="text-[12px]" style={{ color: '#A8A49E' }}>{followedMosques.length} masjid</span>
+                  <p className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>Diikuti</p>
+                  <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{followedMosques.length} masjid</span>
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {followedMosques.map((m) => (
                     <button
                       key={m.id}
                       className="flex items-center gap-2 px-3 py-2 rounded-full flex-shrink-0"
-                      style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+                      style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
                     >
                       <div
                         className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
@@ -225,7 +225,7 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
                       >
                         {m.initials}
                       </div>
-                      <span className="text-[13px] font-medium" style={{ color: '#1A1916' }}>{m.name}</span>
+                      <span className="text-[13px] font-medium" style={{ color: 'var(--text)' }}>{m.name}</span>
                     </button>
                   ))}
                 </div>
@@ -235,8 +235,8 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
             {/* Suggested mosques */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>Cadangan</p>
-                <span className="text-[12px]" style={{ color: '#A8A49E' }}>{suggestedMosques.length} jumpa</span>
+                <p className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>Cadangan</p>
+                <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{suggestedMosques.length} jumpa</span>
               </div>
               <div className="flex flex-col gap-3">
                 {suggestedMosques.map((mosque, i) => (
@@ -247,7 +247,7 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.08 }}
                     className="block rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
-                    style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+                    style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
                   >
                     {/* Card image / dark header area */}
                     <div
@@ -284,12 +284,12 @@ export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMos
                         {mosque.tag && (
                           <span
                             className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                            style={{ background: '#EAF4EE', color: mosque.tagColor ?? '#2D6A4F' }}
+                            style={{ background: 'var(--surface-3)', color: 'var(--text)' }}
                           >
                             {mosque.tag}
                           </span>
                         )}
-                        <span className="text-[12px]" style={{ color: '#A8A49E' }}>{mosque.followers}</span>
+                        <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{mosque.followers}</span>
                       </div>
                       <ChevronRight size={16} strokeWidth={1.5} color="#A8A49E" />
                     </div>

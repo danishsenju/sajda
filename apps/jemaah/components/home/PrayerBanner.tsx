@@ -241,7 +241,7 @@ export function PrayerBanner() {
                 fontWeight: 700,
                 color: '#ffffff',
                 letterSpacing: '-0.5px',
-                fontFamily: 'var(--font-playfair)',
+                fontFamily: 'var(--font-cormorant)',
               }}
             >
               {prayer.label}
@@ -282,7 +282,7 @@ export function PrayerBanner() {
       {/* ── Prayer times strip ──────────────────────────────────────── */}
       <div
         className="flex justify-between px-4 py-3"
-        style={{ background: '#581F2E' }}
+        style={{ background: 'var(--surface-3)' }}
       >
         {prayers.map((p, i) => {
           const isNext = i === nextIndex

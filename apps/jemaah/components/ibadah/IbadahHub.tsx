@@ -24,10 +24,10 @@ const TOOLS = [
     sub: '99 zikir',
     badge: '99',
     resumeLabel: 'SAMBUNG',
-    color: '#EAF4EE',
-    iconColor: '#2D6A4F',
-    icon: () => <TasbihIcon size={24} className="text-[#2D6A4F]" />,
-    badgeColor: '#2D6A4F',
+    color: 'rgba(30,56,40,0.70)',
+    iconColor: '#52C48A',
+    icon: () => <TasbihIcon size={24} className="text-[#52C48A]" />,
+    badgeColor: '#52C48A',
   },
   {
     href: '/ibadah/qibla',
@@ -35,10 +35,10 @@ const TOOLS = [
     sub: '292°',
     badge: null,
     resumeLabel: null,
-    color: '#F0F4FF',
-    iconColor: '#4B6CB7',
-    icon: () => <QiblaIcon size={24} className="text-[#4B6CB7]" />,
-    badgeColor: '#4B6CB7',
+    color: 'rgba(107,143,212,0.15)',
+    iconColor: '#6B8FD4',
+    icon: () => <QiblaIcon size={24} className="text-[#6B8FD4]" />,
+    badgeColor: '#6B8FD4',
   },
   {
     href: '/ibadah/quran',
@@ -46,7 +46,7 @@ const TOOLS = [
     sub: 'Surah 2:183',
     badge: 'ق',
     resumeLabel: 'SAMBUNG',
-    color: '#FFF8EE',
+    color: 'rgba(201,168,76,0.15)',
     iconColor: '#C9A84C',
     icon: () => <QuranIcon size={24} className="text-[#C9A84C]" />,
     badgeColor: '#C9A84C',
@@ -57,10 +57,10 @@ const TOOLS = [
     sub: '14 hari',
     badge: '14',
     resumeLabel: null,
-    color: '#FFF3F5',
-    iconColor: '#C0392B',
-    icon: () => <SolatStreakIcon size={24} className="text-[#C0392B]" />,
-    badgeColor: '#C0392B',
+    color: 'rgba(192,57,43,0.15)',
+    iconColor: '#E05C4B',
+    icon: () => <SolatStreakIcon size={24} className="text-[#E05C4B]" />,
+    badgeColor: '#E05C4B',
   },
   {
     href: '/ibadah/hadis',
@@ -68,10 +68,10 @@ const TOOLS = [
     sub: 'Sahih Bukhari',
     badge: 'ح',
     resumeLabel: null,
-    color: '#F5F0FF',
-    iconColor: '#7B5EA7',
-    icon: () => <HadisIcon size={24} className="text-[#7B5EA7]" />,
-    badgeColor: '#7B5EA7',
+    color: 'rgba(166,124,197,0.15)',
+    iconColor: '#A67CC5',
+    icon: () => <HadisIcon size={24} className="text-[#A67CC5]" />,
+    badgeColor: '#A67CC5',
   },
   {
     href: '/ibadah/mathurat',
@@ -79,10 +79,10 @@ const TOOLS = [
     sub: 'Pagi & Petang',
     badge: 'م',
     resumeLabel: null,
-    color: '#F0FAF5',
-    iconColor: '#2D9C6A',
-    icon: () => <Clock size={24} strokeWidth={1.5} color="#2D9C6A" />,
-    badgeColor: '#2D9C6A',
+    color: 'rgba(30,56,40,0.70)',
+    iconColor: '#52C48A',
+    icon: () => <Clock size={24} strokeWidth={1.5} color="#52C48A" />,
+    badgeColor: '#52C48A',
   },
 ]
 
@@ -97,10 +97,10 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
   return (
     <div className="relative w-16 h-16 flex items-center justify-center flex-shrink-0">
       <svg width="64" height="64" viewBox="0 0 64 64" className="-rotate-90">
-        <circle cx="32" cy="32" r={r} fill="none" stroke="#E8E5DF" strokeWidth="4" />
+        <circle cx="32" cy="32" r={r} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="4" />
         <circle
           cx="32" cy="32" r={r} fill="none"
-          stroke="#2D6A4F" strokeWidth="4"
+          stroke="var(--primary)" strokeWidth="4"
           strokeDasharray={circ}
           strokeDashoffset={offset}
           strokeLinecap="round"
@@ -109,7 +109,7 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
       </svg>
       <span
         className="absolute text-[14px] font-bold"
-        style={{ color: '#1A1916' }}
+        style={{ color: 'var(--text)' }}
       >
         {done}/{total}
       </span>
@@ -160,20 +160,20 @@ export function IbadahHub({ nextPrayer, ibadahDone = 6, ibadahTotal = 8 }: Props
   }, [nextPrayer])
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#F7F6F3' }}>
+    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
       <Sidebar mosques={[]} selectedId={null} onMosqueSelect={() => {}} />
 
       <div className="flex-1 flex flex-col md:ml-[240px]">
         {/* Mobile header */}
         <header
           className="md:hidden sticky top-0 z-30 safe-top"
-          style={{ background: '#FFFFFF', borderBottom: '1px solid #E8E5DF' }}
+          style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}
         >
           <div className="flex items-center justify-between px-5 h-14">
             <Image src="/sajda-logo.png" alt="SAJDA" width={80} height={32} className="object-contain" priority />
-            <span className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>Ibadah</span>
+            <span className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>Ibadah</span>
             <button className="w-11 h-11 flex items-center justify-center" aria-label="Pemberitahuan">
-              <Bell size={20} strokeWidth={1.5} color="#1A1916" />
+              <Bell size={20} strokeWidth={1.5} color="var(--text)" />
             </button>
           </div>
         </header>
@@ -182,12 +182,12 @@ export function IbadahHub({ nextPrayer, ibadahDone = 6, ibadahTotal = 8 }: Props
           <div className="px-5 pt-6 md:max-w-[900px] md:mx-auto md:px-8 md:py-6">
 
             {/* Page heading */}
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1" style={{ color: '#C9A84C' }}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1" style={{ color: 'var(--warning)' }}>
               Ibadah
             </p>
             <h1
               className="text-[26px] font-bold leading-tight mb-5"
-              style={{ color: '#1A1916', fontFamily: 'var(--font-playfair)' }}
+              style={{ color: 'var(--text)', fontFamily: 'var(--font-playfair)' }}
             >
               Alat-alat<br />untuk hari ini
             </h1>
@@ -195,18 +195,18 @@ export function IbadahHub({ nextPrayer, ibadahDone = 6, ibadahTotal = 8 }: Props
             {/* Today's progress card */}
             <div
               className="flex items-center gap-4 p-4 rounded-2xl mb-6"
-              style={{ background: '#FFFFFF', border: '1px solid #E8E5DF' }}
+              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
             >
               <ProgressRing done={ibadahDone} total={ibadahTotal} />
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-1" style={{ color: '#A8A49E' }}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-1" style={{ color: 'var(--text-dim)' }}>
                   Hari Ini
                 </p>
-                <p className="text-[15px] font-semibold leading-snug" style={{ color: '#1A1916' }}>
+                <p className="text-[15px] font-semibold leading-snug" style={{ color: 'var(--text)' }}>
                   Solat {prayer.label} · {prayer.time}
                 </p>
                 {remaining > 0 && (
-                  <p className="text-[13px] mt-0.5" style={{ color: '#6B6860' }}>
+                  <p className="text-[13px] mt-0.5" style={{ color: 'var(--text-dim)' }}>
                     {remaining} ibadah lagi tunggu
                   </p>
                 )}
@@ -235,7 +235,7 @@ export function IbadahHub({ nextPrayer, ibadahDone = 6, ibadahTotal = 8 }: Props
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.25 }}
                   className="relative flex flex-col p-4 rounded-2xl overflow-hidden active:scale-[0.97] transition-transform"
-                  style={{ background: '#FFFFFF', border: '1px solid #E8E5DF', minHeight: '110px' }}
+                  style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', minHeight: '110px' }}
                 >
                   {/* Icon top-left */}
                   <div
@@ -256,12 +256,12 @@ export function IbadahHub({ nextPrayer, ibadahDone = 6, ibadahTotal = 8 }: Props
                   )}
 
                   {/* Label + sub */}
-                  <p className="text-[13px] font-semibold" style={{ color: '#1A1916' }}>{tool.label}</p>
-                  <p className="text-[12px]" style={{ color: '#A8A49E' }}>{sub}</p>
+                  <p className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>{tool.label}</p>
+                  <p className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{sub}</p>
 
                   {/* Resume link */}
                   {resumeLabel && (
-                    <p className="text-[11px] font-semibold mt-1" style={{ color: '#2D6A4F' }}>
+                    <p className="text-[11px] font-semibold mt-1" style={{ color: 'var(--primary)' }}>
                       ▶ {resumeLabel}
                     </p>
                   )}

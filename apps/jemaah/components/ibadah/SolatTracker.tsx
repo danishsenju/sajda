@@ -276,7 +276,7 @@ export function SolatTracker() {
                 className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-left transition-all"
                 style={{
                   background: done ? 'var(--primary)' : 'var(--surface-2)',
-                  boxShadow: done ? '0 4px 16px rgba(16,41,55,0.20)' : '0 1px 6px rgba(16,41,55,0.06)',
+                  boxShadow: done ? '0 4px 16px rgba(166,124,197,0.25)' : 'none',
                 }}
               >
                 <span className="text-xl">{p.icon}</span>
@@ -352,7 +352,7 @@ export function SolatTracker() {
                     background: full
                       ? 'var(--primary)'
                       : partial
-                      ? 'rgba(16,41,55,0.15)'
+                      ? 'rgba(166,124,197,0.20)'
                       : 'var(--surface-2)',
                     border: isToday ? '2px solid var(--accent)' : 'none',
                   }}
