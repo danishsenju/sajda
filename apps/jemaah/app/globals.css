@@ -1,144 +1,165 @@
 @import "tailwindcss";
 
-/* ─── SAJDA Design Tokens ─────────────────────────────────────────────────── */
+/* ─── SAJDA Design Tokens — Light (Default) ───────────────────────────────── */
 :root {
-  /* Backgrounds — Layla wa Nahar */
-  --surface:        #0C0C14;
-  --surface-2:      #1A1A2E;
-  --surface-3:      #1E3828;
+  /* Surfaces */
+  --surface:          #F7F5F0;
+  --surface-raised:   #FFFFFF;
+  --surface-overlay:  #F0EDE6;
+  --surface-input:    #F0EDE6;
+  --surface-sidebar:  #1C2B22;
 
-  /* Text — white on dark, palette colors for hierarchy */
-  --text:           #FFFFFF;
-  --text-muted:     #A67CC5;
-  --text-dim:       #6B8FD4;
+  /* Brand */
+  --primary:          #1E6B45;
+  --primary-hover:    #165435;
+  --primary-muted:    rgba(30,107,69,0.10);
+  --gold:             #B8860B;
+  --gold-light:       #D4A017;
+  --gold-muted:       rgba(184,134,11,0.12);
 
-  /* Brand / Accent */
-  --primary:        #A67CC5;
-  --accent:         #1E3828;
-  --accent-2:       #6B8FD4;
-  --accent-surface: #1E3828;
-  --accent-border:  #1E3828;
-
-  /* Legacy aliases kept for dynamic mosque theming */
-  --accent-soft:    #1E3828;
-  --accent-hover:   #C9A84C;
-  --primary-soft:   #1A1A2E;
+  /* Text */
+  --text-primary:     #1A1A1A;
+  --text-secondary:   #6B6B6B;
+  --text-disabled:    #ADADAD;
+  --text-inverse:     #F7F5F0;
+  --text-arabic:      #8B6914;
 
   /* Borders */
-  --border:         #1A1A2E;
-  --border-strong:  #1E3828;
-  --border-accent:  #1E3828;
+  --border:           rgba(0,0,0,0.08);
+  --border-strong:    rgba(0,0,0,0.15);
+  --border-gold:      rgba(184,134,11,0.20);
 
   /* Semantic */
-  --success:        #1E3828;
-  --warning:        #C9A84C;
-  --error:          #C0392B;
-  --danger:         #C0392B;
+  --success:          #1E6B45;
+  --warning:          #B8860B;
+  --error:            #C0392B;
+  --info:             #2B6CB0;
+
+  /* Elevation */
+  --shadow-sm:        0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:        0 4px 12px rgba(0,0,0,0.10);
+  --shadow-lg:        0 8px 24px rgba(0,0,0,0.12);
+  --shadow-gold:      0 4px 16px rgba(184,134,11,0.15);
+}
+
+/* ─── Dark Theme ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  /* Surfaces */
+  --surface:          #0F1410;
+  --surface-raised:   #182118;
+  --surface-overlay:  #1F2B1F;
+  --surface-input:    #162016;
+  --surface-sidebar:  #0A0F0A;
+
+  /* Brand */
+  --primary:          #4CAF7D;
+  --primary-hover:    #5DC98E;
+  --primary-muted:    rgba(76,175,125,0.12);
+  --gold:             #C9A84C;
+  --gold-light:       #E0C068;
+  --gold-muted:       rgba(201,168,76,0.12);
+
+  /* Text */
+  --text-primary:     #EAE8E0;
+  --text-secondary:   #8A9485;
+  --text-disabled:    #4A5245;
+  --text-inverse:     #EAE8E0;
+  --text-arabic:      #C9A84C;
+
+  /* Borders */
+  --border:           rgba(255,255,255,0.07);
+  --border-strong:    rgba(255,255,255,0.12);
+  --border-gold:      rgba(201,168,76,0.20);
+
+  /* Elevation */
+  --shadow-sm:        0 1px 3px rgba(0,0,0,0.30);
+  --shadow-md:        0 4px 12px rgba(0,0,0,0.40);
+  --shadow-lg:        0 8px 24px rgba(0,0,0,0.50);
+  --shadow-gold:      0 4px 16px rgba(201,168,76,0.15);
 }
 
 /* ─── Tailwind v4 Theme Mapping ───────────────────────────────────────────── */
 @theme inline {
-  --color-surface:        var(--surface);
-  --color-surface-2:      var(--surface-2);
-  --color-surface-3:      var(--surface-3);
-  --color-primary:        var(--primary);
-  --color-primary-soft:   var(--primary-soft);
-  --color-accent:         var(--accent);
-  --color-accent-hover:   var(--accent-hover);
-  --color-foreground:     var(--text);
-  --color-muted:          var(--text-muted);
-  --color-dim:            var(--text-dim);
-  --color-success:        var(--success);
-  --color-warning:        var(--warning);
-  --color-error:          var(--error);
-  --color-border:         var(--border);
-  --color-border-accent:  var(--border-accent);
-  --font-sans:            var(--font-jakarta);
-  --font-display:         var(--font-cormorant);
-  --font-arabic:          var(--font-amiri);
-  --radius-card:          16px;
-  --radius-btn:           12px;
-  --radius-pill:          9999px;
-  --radius-input:         10px;
+  --color-surface:          var(--surface);
+  --color-surface-raised:   var(--surface-raised);
+  --color-surface-overlay:  var(--surface-overlay);
+  --color-surface-input:    var(--surface-input);
+  --color-surface-sidebar:  var(--surface-sidebar);
+  --color-primary:          var(--primary);
+  --color-primary-hover:    var(--primary-hover);
+  --color-gold:             var(--gold);
+  --color-gold-light:       var(--gold-light);
+  --color-text-primary:     var(--text-primary);
+  --color-text-secondary:   var(--text-secondary);
+  --color-text-disabled:    var(--text-disabled);
+  --color-text-inverse:     var(--text-inverse);
+  --color-text-arabic:      var(--text-arabic);
+  --color-border:           var(--border);
+  --color-border-strong:    var(--border-strong);
+  --color-border-gold:      var(--border-gold);
+  --color-success:          var(--success);
+  --color-warning:          var(--warning);
+  --color-error:            var(--error);
+  --color-info:             var(--info);
+  --font-sans:              var(--font-jakarta);
+  --font-display:           var(--font-cormorant);
+  --font-arabic:            var(--font-amiri);
+  --radius-card:            16px;
+  --radius-btn:             12px;
+  --radius-pill:            9999px;
+  --radius-input:           10px;
 }
 
-/* ─── Light theme overrides ───────────────────────────────────────────── */
-[data-theme="light"] {
-  --surface:        #F5F2EC;
-  --surface-2:      #EDE8DF;
-  --surface-3:      #E2EFE6;
-  --accent:         #E6E1D6;
-  --accent-soft:    #E6E1D6;
-  --accent-surface: #E6E1D6;
-  --accent-border:  rgba(40,110,65,0.28);
-  --accent-hover:   #9B6F2A;
-  --primary-soft:   #EDE8DF;
-
-  --text:           #1C1830;
-  --text-muted:     #9A9587;
-  --text-dim:       #B0AA9F;
-
-  --primary:        #7A58A8;
-  --accent-2:       #4A64AC;
-  --warning:        #9B6F2A;
-
-  --border:         rgba(0,0,0,0.07);
-  --border-strong:  rgba(155,111,42,0.22);
-  --border-accent:  rgba(40,110,65,0.28);
-
-  --success:        #E2EFE6;
-  --error:          #C0392B;
-  --danger:         #C0392B;
-}
-
-/* ─── Base ────────────────────────────────────────────────────────────── */
+/* ─── Base ────────────────────────────────────────────────────────────────── */
 html {
   background-color: var(--surface);
-  color: var(--text);
+  color: var(--text-primary);
   -webkit-tap-highlight-color: transparent;
   scrollbar-gutter: stable;
 }
 
 body {
   background-color: var(--surface);
-  color: var(--text);
+  color: var(--text-primary);
   font-family: var(--font-jakarta), system-ui, sans-serif;
   overscroll-behavior-y: none;
 }
 
-/* ─── Safe-area helpers ───────────────────────────────────────────────── */
+/* ─── Safe-area helpers ───────────────────────────────────────────────────── */
 .safe-top    { padding-top:    env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-/* ─── Scrollbar (webkit) ──────────────────────────────────────────────── */
+/* ─── Scrollbar (webkit) ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
 
-/* ── iOS Glass Material ───────────────────────────────────────── */
+/* ─── Glass Material (light-first) ───────────────────────────────────────── */
 .glass-surface {
-  background: rgba(255,255,255,0.055);
+  background: rgba(255,255,255,0.72);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 0.5px solid rgba(255,255,255,0.14);
+  border: 0.5px solid rgba(0,0,0,0.07);
 }
 .glass-surface-2 {
-  background: rgba(255,255,255,0.035);
+  background: rgba(255,255,255,0.50);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 0.5px solid rgba(255,255,255,0.09);
+  border: 0.5px solid rgba(0,0,0,0.05);
 }
 .glass-sheet {
-  background: rgba(14,13,28,0.90);
+  background: rgba(240,238,232,0.94);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 0.5px solid rgba(255,255,255,0.10);
+  border: 0.5px solid rgba(0,0,0,0.08);
 }
-[data-theme="light"] .glass-surface   { background: rgba(255,255,255,0.72); border-color: rgba(0,0,0,0.07); }
-[data-theme="light"] .glass-surface-2 { background: rgba(255,255,255,0.50); border-color: rgba(0,0,0,0.05); }
-[data-theme="light"] .glass-sheet     { background: rgba(240,238,232,0.94); border-color: rgba(0,0,0,0.08); }
 
-/* ── Aurora orb keyframes ─────────────────────────────────────── */
+[data-theme="dark"] .glass-surface   { background: rgba(255,255,255,0.055); border-color: rgba(255,255,255,0.14); }
+[data-theme="dark"] .glass-surface-2 { background: rgba(255,255,255,0.035); border-color: rgba(255,255,255,0.09); }
+[data-theme="dark"] .glass-sheet     { background: rgba(15,20,16,0.90);     border-color: rgba(255,255,255,0.10); }
+
+/* ─── Aurora keyframes — move to individual page components, not global ───── */
+/*
 @keyframes aurora-drift-1 {
   0%,100% { transform: translate(0,0) scale(1); }
   33%     { transform: translate(18px,-24px) scale(1.08); }
@@ -161,15 +182,12 @@ body {
 .aurora-orb-2 { animation: aurora-drift-2 18s ease-in-out infinite, aurora-pulse 9s ease-in-out infinite 2s; }
 .aurora-orb-3 { animation: aurora-drift-3 12s ease-in-out infinite, aurora-pulse 6s ease-in-out infinite 1s; }
 .aurora-orb-4 { animation: aurora-drift-1 22s ease-in-out infinite reverse, aurora-pulse 11s ease-in-out infinite 3s; }
-[data-theme="light"] .aurora-orb-1,
-[data-theme="light"] .aurora-orb-2,
-[data-theme="light"] .aurora-orb-3,
-[data-theme="light"] .aurora-orb-4 { opacity: 0.35 !important; }
 @media (prefers-reduced-motion: reduce) {
   .aurora-orb-1,.aurora-orb-2,.aurora-orb-3,.aurora-orb-4 { animation: none; }
 }
+*/
 
-/* ── Dynamic Island pill ─────────────────────────────────────── */
+/* ─── Dynamic Island pill ─────────────────────────────────────────────────── */
 .dynamic-island {
   display: inline-flex;
   align-items: center;
@@ -183,9 +201,9 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.45), 0 0 0 0.5px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
-/* ── Particle burst container ────────────────────────────────── */
+/* ─── Particle burst container ────────────────────────────────────────────── */
 .particle-burst { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
 
-/* ── Scrollbar hide ──────────────────────────────────────────── */
+/* ─── Scrollbar hide ──────────────────────────────────────────────────────── */
 .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
