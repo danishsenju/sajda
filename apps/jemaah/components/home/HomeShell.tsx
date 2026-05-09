@@ -145,7 +145,7 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
   const selectedMosque = mosques.find((m) => m.id === selectedMosqueId)
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
+    <div className="flex min-h-dvh" style={{ background: 'var(--surface)' }}>
 
       {/* ── Desktop sidebar ────────────────────────────────────────── */}
       <Sidebar
@@ -205,7 +205,7 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                   <div className="w-1 h-4 rounded-full" style={{ background: 'linear-gradient(180deg, #C9A84C, rgba(201,168,76,0.3))' }} />
                   <p
                     className="text-[12px] font-semibold uppercase tracking-[0.08em]"
-                    style={{ color: 'rgba(255,255,255,0.55)' }}
+                    style={{ color: 'var(--text-dim)' }}
                   >
                     Akses Pantas
                   </p>
@@ -228,9 +228,9 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                     href={action.href}
                     className="relative flex flex-col items-center gap-2.5 py-4 px-2 rounded-[18px] transition-all duration-200 active:scale-[0.94] overflow-hidden"
                     style={{
-                      background: 'linear-gradient(160deg, #1C1C32 0%, #13131E 100%)',
-                      border: '1px solid rgba(107,143,212,0.14)',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+                      background: 'var(--surface-2)',
+                      border: '1px solid var(--border)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                     }}
                   >
                     {/* Gold shimmer top line */}
@@ -243,9 +243,8 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
                     <div
                       className="w-11 h-11 rounded-[13px] flex items-center justify-center"
                       style={{
-                        background: 'linear-gradient(145deg, rgba(107,143,212,0.16) 0%, rgba(107,143,212,0.05) 100%)',
-                        border: '1px solid rgba(107,143,212,0.2)',
-                        boxShadow: '0 0 14px rgba(107,143,212,0.1), inset 0 1px 0 rgba(255,255,255,0.07)',
+                        background: 'var(--surface-3)',
+                        border: '1px solid var(--border)',
                       }}
                     >
                       {action.icon}
@@ -253,7 +252,7 @@ export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
 
                     <span
                       className="text-[11px] font-semibold text-center leading-tight tracking-[0.02em]"
-                      style={{ color: 'rgba(255,255,255,0.6)' }}
+                      style={{ color: 'var(--text)' }}
                     >
                       {action.label}
                     </span>

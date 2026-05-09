@@ -1,9 +1,10 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Bell, ChevronRight, Globe, User, Landmark, LogOut } from 'lucide-react'
+import { Bell, ChevronRight, Globe, Moon, Sun, User, Landmark, LogOut } from 'lucide-react'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { Sidebar } from '@/components/ui/Sidebar'
+import { useTheme } from '@/components/ui/ThemeProvider'
 import { createClient } from '@/lib/supabase/browser'
 import { useRouter } from 'next/navigation'
 
@@ -98,6 +99,7 @@ export function ProfilContent({
   streak = 0,
 }: Props) {
   const router = useRouter()
+  const { theme, toggleTheme } = useTheme()
   const initials = getInitials(email, name)
 
   async function handleSignOut() {
@@ -193,6 +195,40 @@ export function ProfilContent({
           </p>
           <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
             <SettingsRow icon={Globe} label="Bahasa" value="Bahasa Melayu" />
+            <div style={{ borderTop: '1px solid var(--border)' }}>
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-left"
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-3)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'var(--surface-3)' }}
+                >
+                  {theme === 'dark'
+                    ? <Moon size={16} strokeWidth={1.5} color="var(--text-dim)" />
+                    : <Sun size={16} strokeWidth={1.5} color="var(--text-dim)" />
+                  }
+                </div>
+                <span className="flex-1 text-[14px] font-medium" style={{ color: 'var(--text)' }}>
+                  Mod Paparan
+                </span>
+                {/* Pill toggle */}
+                <div
+                  className="relative w-11 h-6 rounded-full flex-shrink-0 transition-colors duration-200"
+                  style={{ background: theme === 'dark' ? 'var(--primary)' : 'var(--warning)' }}
+                >
+                  <div
+                    className="absolute top-0.5 w-5 h-5 rounded-full transition-transform duration-200 shadow-sm"
+                    style={{
+                      background: '#fff',
+                      transform: theme === 'dark' ? 'translateX(1px)' : 'translateX(21px)',
+                    }}
+                  />
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 

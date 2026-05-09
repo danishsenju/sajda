@@ -102,7 +102,7 @@ export function AppShell({ title, children }: Props) {
   const pathname = usePathname()
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
+    <div className="flex min-h-dvh" style={{ background: 'var(--surface)' }}>
 
       {/* ── Desktop sidebar ───────────────────────────────────────── */}
       <aside

@@ -291,12 +291,12 @@ export function PrayerBanner() {
             <div
               key={p.name}
               className="flex flex-col items-center gap-1 flex-1 px-1 py-1.5 rounded-xl transition-colors"
-              style={isNext ? { background: 'rgba(255,255,255,0.14)' } : {}}
+              style={isNext ? { background: 'rgba(0,0,0,0.1)' } : {}}
             >
               <span
                 className="text-[11px]"
                 style={{
-                  color: isNext ? '#ffffff' : isPast ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.55)',
+                  color: isNext ? 'var(--text)' : isPast ? 'var(--text-muted)' : 'var(--text-dim)',
                   fontWeight: isNext ? 700 : 400,
                 }}
               >
@@ -304,12 +304,12 @@ export function PrayerBanner() {
               </span>
               <div
                 className="w-1 h-1 rounded-full"
-                style={{ background: isNext ? '#ffffff' : isPast ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.18)' }}
+                style={{ background: isNext ? 'var(--text)' : isPast ? 'var(--text-muted)' : 'var(--border-strong)' }}
               />
               <span
                 className="text-[11px] tabular-nums"
                 style={{
-                  color: isNext ? '#ffffff' : isPast ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.55)',
+                  color: isNext ? 'var(--text)' : isPast ? 'var(--text-muted)' : 'var(--text-dim)',
                   fontWeight: isNext ? 700 : 400,
                 }}
               >
