@@ -1,305 +1,369 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Search, MapPin, Navigation, ChevronRight } from 'lucide-react'
-import { BottomNav } from '@/components/ui/BottomNav'
+import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Search, Landmark } from 'lucide-react'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/browser'
 import { Sidebar } from '@/components/ui/Sidebar'
-import Image from 'next/image'
-import { Bell } from 'lucide-react'
+import { BottomNav } from '@/components/ui/BottomNav'
+import { LogoTopBar } from '@/components/ui/LogoTopBar'
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
 type Mosque = {
   id: string
   name: string
-  initials: string
-  color: string
+  slug: string
+  zone_code?: string | null
+  jemaah_count?: number
 }
 
-type SuggestedMosque = {
-  id: string
-  name: string
-  address: string
-  distance: string
-  followers: string
-  tag?: string
-  tagColor?: string
+type Props = {
+  mosques: Mosque[]
+  followedIds: string[]
 }
 
-/* ─── Tab filter pills ───────────────────────────────────────────────────── */
+const TABS = ['Berdekatan', 'Diikuti', 'Semua'] as const
+type Tab = (typeof TABS)[number]
 
-const TABS = ['Berdekatan', 'Diikuti', 'Semua']
+/* ─── Animation variants ─────────────────────────────────────────────────── */
 
-/* ─── Mock map placeholder ───────────────────────────────────────────────── */
+const listVariants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.03 } },
+}
+const cardVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 500, damping: 35 } },
+}
 
-function MapPlaceholder() {
+/* ─── Helpers ────────────────────────────────────────────────────────────── */
+
+function formatCount(n?: number): string {
+  if (!n) return '0'
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace('.0', '')}k`
+  return String(n)
+}
+
+/* ─── Skeleton ───────────────────────────────────────────────────────────── */
+
+function MosqueCardSkeleton() {
   return (
     <div
-      className="w-full h-[180px] rounded-2xl relative overflow-hidden flex items-end justify-end p-3"
-      style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #3B8C63 100%)' }}
+      className="flex items-center gap-3 rounded-2xl p-4 animate-pulse"
+      style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)' }}
     >
-      {/* Decorative dots simulating map pins */}
-      <div className="absolute inset-0">
-        <div
-          className="absolute w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: '#C9A84C', top: '40%', left: '38%', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C12 2 7 6.5 7 11C7 13.76 9.24 16 12 16C14.76 16 17 13.76 17 11C17 6.5 12 2 12 2Z" fill="white" stroke="white" strokeWidth="1.5" />
-            <path d="M5 22V19H19V22" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </div>
-        <div
-          className="absolute w-7 h-7 rounded-full flex items-center justify-center"
-          style={{ background: '#2D6A4F', top: '25%', left: '62%', border: '2px solid white', boxShadow: '0 2px 6px rgba(0,0,0,0.25)' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C12 2 7 6.5 7 11C7 13.76 9.24 16 12 16C14.76 16 17 13.76 17 11C17 6.5 12 2 12 2Z" fill="white" />
-          </svg>
-        </div>
-        <div
-          className="absolute w-7 h-7 rounded-full flex items-center justify-center"
-          style={{ background: '#2D6A4F', top: '55%', left: '70%', border: '2px solid white', boxShadow: '0 2px 6px rgba(0,0,0,0.25)' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C12 2 7 6.5 7 11C7 13.76 9.24 16 12 16C14.76 16 17 13.76 17 11C17 6.5 12 2 12 2Z" fill="white" />
-          </svg>
-        </div>
-        {/* Subtle grid lines */}
-        <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 360 180">
-          <line x1="0" y1="60" x2="360" y2="60" stroke="white" strokeWidth="0.8" />
-          <line x1="0" y1="120" x2="360" y2="120" stroke="white" strokeWidth="0.8" />
-          <line x1="90" y1="0" x2="90" y2="180" stroke="white" strokeWidth="0.8" />
-          <line x1="180" y1="0" x2="180" y2="180" stroke="white" strokeWidth="0.8" />
-          <line x1="270" y1="0" x2="270" y2="180" stroke="white" strokeWidth="0.8" />
-        </svg>
+      <div className="w-10 h-10 rounded-full shrink-0" style={{ background: 'var(--surface-overlay)' }} />
+      <div className="flex-1 space-y-2">
+        <div className="h-3.5 rounded-full w-3/5" style={{ background: 'var(--surface-overlay)' }} />
+        <div className="h-2.5 rounded-full w-2/5" style={{ background: 'var(--surface-overlay)' }} />
       </div>
-
-      {/* Buka peta button */}
-      <button
-        className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold"
-        style={{ background: 'rgba(255,255,255,0.90)', color: '#1A1916' }}
-      >
-        <Navigation size={12} strokeWidth={2} />
-        Buka peta
-      </button>
+      <div className="h-7 w-14 rounded-full" style={{ background: 'var(--surface-overlay)' }} />
     </div>
   )
 }
 
 /* ─── MasjidContent ──────────────────────────────────────────────────────── */
 
-type Props = {
-  followedMosques?: Mosque[]
-  suggestedMosques?: SuggestedMosque[]
-}
+export function MasjidContent({ mosques, followedIds }: Props) {
+  const [activeTab, setActiveTab] = useState<Tab>('Semua')
+  const [search, setSearch] = useState('')
+  const [followed, setFollowed] = useState<Set<string>>(new Set(followedIds))
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Mosque | null>(null)
 
-const DEFAULT_FOLLOWED: Mosque[] = [
-  { id: '1', name: 'Masjid Wilayah', initials: 'W', color: '#2D6A4F' },
-  { id: '2', name: 'Masjid Negara',  initials: 'N', color: '#C9A84C' },
-  { id: '3', name: 'Masjid Jamek',   initials: 'J', color: '#4B6CB7' },
-]
+  /* ── Follow / unfollow ── */
+  async function toggleFollow(e: React.MouseEvent, mosque: Mosque) {
+    e.stopPropagation()
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
-const DEFAULT_SUGGESTED: SuggestedMosque[] = [
-  {
-    id: 's1',
-    name: 'Masjid Al-Bukhary',
-    address: 'Jalan Hang Tuah · KL',
-    distance: '1.2 km',
-    followers: '12,420 pengikut',
-    tag: 'Masjid Negeri',
-    tagColor: '#2D6A4F',
-  },
-  {
-    id: 's2',
-    name: 'Masjid As-Syakirin',
-    address: 'KLCC · Kuala Lumpur',
-    distance: '2.4 km',
-    followers: '8,750 pengikut',
-    tag: 'Wakaf',
-    tagColor: '#C9A84C',
-  },
-]
+    setLoadingId(mosque.id)
+    if (followed.has(mosque.id)) {
+      await (supabase as any)
+        .from('jemaah_follows')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('masjid_id', mosque.id)
+      setFollowed(prev => {
+        const next = new Set(prev)
+        next.delete(mosque.id)
+        return next
+      })
+    } else {
+      await (supabase as any)
+        .from('jemaah_follows')
+        .insert({ user_id: user.id, masjid_id: mosque.id })
+      setFollowed(prev => new Set([...prev, mosque.id]))
+    }
+    setLoadingId(null)
+  }
 
-export function MasjidContent({ followedMosques = DEFAULT_FOLLOWED, suggestedMosques = DEFAULT_SUGGESTED }: Props) {
-  const [activeTab, setActiveTab] = useState('Berdekatan')
-  const [searchQuery, setSearchQuery] = useState('')
+  /* ── Filter ── */
+  const filtered = useMemo(() => {
+    let list = mosques
+    if (activeTab === 'Diikuti') list = list.filter(m => followed.has(m.id))
+    // Berdekatan: fallback to all until geolocation is implemented
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter(m => m.name.toLowerCase().includes(q))
+    }
+    return list
+  }, [mosques, activeTab, search, followed])
+
+  /* ── Empty state ── */
+  const emptyMessage = activeTab === 'Diikuti'
+    ? { title: 'Belum Ikuti Masjid', sub: 'Ikuti masjid untuk melihatnya di sini' }
+    : { title: 'Tiada Hasil Carian', sub: 'Cuba cari dengan nama yang lain' }
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
-      <Sidebar mosques={[]} selectedId={null} onMosqueSelect={() => {}} />
+    <div className="flex min-h-dvh" style={{ background: 'var(--surface)' }}>
+      <Sidebar />
 
-      <div className="flex-1 flex flex-col md:ml-[240px]">
-        {/* Mobile header */}
-        <header
-          className="md:hidden sticky top-0 z-30 safe-top"
-          style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}
-        >
-          <div className="flex items-center justify-between px-5 h-14">
-            <Image src="/sajda-logo.png" alt="SAJDA" width={80} height={32} className="object-contain" priority />
-            <span className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>Masjid</span>
-            <button className="w-11 h-11 flex items-center justify-center" aria-label="Pemberitahuan">
-              <Bell size={20} strokeWidth={1.5} color="var(--text)" />
-            </button>
-          </div>
-        </header>
+      <div className="flex-1 flex flex-col min-w-0 md:ml-60">
+        <LogoTopBar />
 
-        <main className="flex-1 pb-24 md:pb-10">
-          <div className="px-5 pt-6 md:max-w-[900px] md:mx-auto md:px-8 md:py-6">
+        <div className="flex-1 flex flex-col md:flex-row md:overflow-hidden pt-14 md:pt-0">
 
-            {/* Page heading */}
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1" style={{ color: 'var(--warning)' }}>
-              Masjid
-            </p>
-            <h1
-              className="text-[26px] font-bold leading-tight mb-5"
-              style={{ color: 'var(--text)', fontFamily: 'var(--font-playfair)' }}
-            >
-              Temui rumah Allah<br />berdekatan anda
-            </h1>
+          {/* ══════════════════════════════════════════
+              LEFT PANEL — search + tabs + list
+          ══════════════════════════════════════════ */}
+          <div
+            className="md:w-[360px] md:shrink-0 md:flex md:flex-col md:overflow-hidden"
+            style={{ borderRight: '1px solid var(--border)' }}
+          >
+            {/* Search + tabs */}
+            <div className="px-4 pt-4 pb-3 space-y-3 md:px-5 md:pt-5 md:shrink-0">
 
-            {/* Search bar */}
-            <div
-              className="flex items-center gap-3 px-4 h-12 rounded-2xl mb-4"
-              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-            >
-              <Search size={16} strokeWidth={1.5} color="var(--text-dim)" />
-              <input
-                type="text"
-                placeholder="Cari masjid berdekatan..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 text-[14px] bg-transparent outline-none"
-                style={{ color: 'var(--text)' }}
-              />
-              <button
-                className="flex items-center gap-1 text-[12px] font-semibold"
-                style={{ color: 'var(--primary)' }}
+              <div
+                className="flex items-center gap-3 rounded-2xl px-4 py-3"
+                style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)' }}
               >
-                <MapPin size={12} strokeWidth={2} />
-                Lokasi
-              </button>
-            </div>
-
-            {/* Tab pills */}
-            <div className="flex gap-2 mb-5">
-              {TABS.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className="px-4 py-2 rounded-full text-[13px] font-semibold transition-colors"
-                  style={
-                    activeTab === tab
-                      ? { background: 'var(--primary)', color: '#FFFFFF' }
-                      : { background: 'var(--surface-2)', color: 'var(--text-dim)', border: '1px solid var(--border)' }
-                  }
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            {/* Map */}
-            <div className="mb-6">
-              <MapPlaceholder />
-            </div>
-
-            {/* Followed mosques */}
-            {followedMosques.length > 0 && (
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>Diikuti</p>
-                  <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{followedMosques.length} masjid</span>
-                </div>
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {followedMosques.map((m) => (
-                    <button
-                      key={m.id}
-                      className="flex items-center gap-2 px-3 py-2 rounded-full flex-shrink-0"
-                      style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-                    >
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
-                        style={{ background: m.color }}
-                      >
-                        {m.initials}
-                      </div>
-                      <span className="text-[13px] font-medium" style={{ color: 'var(--text)' }}>{m.name}</span>
-                    </button>
-                  ))}
-                </div>
+                <Search size={16} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Cari masjid..."
+                  className="flex-1 bg-transparent text-sm outline-none"
+                  style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}
+                />
               </div>
-            )}
 
-            {/* Suggested mosques */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>Cadangan</p>
-                <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{suggestedMosques.length} jumpa</span>
-              </div>
-              <div className="flex flex-col gap-3">
-                {suggestedMosques.map((mosque, i) => (
-                  <motion.a
-                    key={mosque.id}
-                    href={`/masjid/${mosque.id}`}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    className="block rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
-                    style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+              <div className="flex gap-2">
+                {TABS.map(tab => (
+                  <motion.button
+                    key={tab}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => setActiveTab(tab)}
+                    className="flex-1 py-2 rounded-full text-xs font-semibold transition-colors"
+                    style={{
+                      fontFamily: 'var(--font-jakarta)',
+                      background: activeTab === tab ? 'var(--primary)' : 'transparent',
+                      color: activeTab === tab ? '#ffffff' : 'var(--text-secondary)',
+                      border: `1px solid ${activeTab === tab ? 'transparent' : 'var(--border)'}`,
+                    }}
                   >
-                    {/* Card image / dark header area */}
-                    <div
-                      className="relative h-[110px] flex flex-col justify-between p-4"
-                      style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)' }}
-                    >
-                      {/* Distance badge */}
-                      <div className="flex justify-end">
-                        <span
-                          className="text-[12px] font-semibold px-2.5 py-1 rounded-full"
-                          style={{ background: 'rgba(255,255,255,0.20)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.25)' }}
-                        >
-                          {mosque.distance}
-                        </span>
-                      </div>
-
-                      {/* Decorative star */}
-                      <svg className="absolute right-8 top-3 opacity-15" width="50" height="50" viewBox="0 0 24 24" fill="white">
-                        <polygon points="12,2 14.4,9.2 22,9.2 16,13.8 18.4,21 12,16.4 5.6,21 8,13.8 2,9.2 9.6,9.2" />
-                      </svg>
-
-                      {/* Mosque name */}
-                      <div>
-                        <h3 className="text-[16px] font-bold text-white leading-snug">{mosque.name}</h3>
-                        <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.70)' }}>
-                          <MapPin size={10} className="inline mr-1" />{mosque.address}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Card footer */}
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {mosque.tag && (
-                          <span
-                            className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                            style={{ background: 'var(--surface-3)', color: 'var(--text)' }}
-                          >
-                            {mosque.tag}
-                          </span>
-                        )}
-                        <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>{mosque.followers}</span>
-                      </div>
-                      <ChevronRight size={16} strokeWidth={1.5} color="#A8A49E" />
-                    </div>
-                  </motion.a>
+                    {tab}
+                  </motion.button>
                 ))}
               </div>
             </div>
 
+            {/* Mosque list */}
+            <div className="px-4 pb-28 md:px-5 md:pb-6 md:overflow-y-auto md:flex-1">
+              <AnimatePresence mode="wait">
+                {filtered.length === 0 ? (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center py-16 gap-3"
+                  >
+                    <Landmark size={32} strokeWidth={1.2} style={{ color: 'var(--text-disabled)' }} />
+                    <p
+                      className="text-[20px] font-semibold"
+                      style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-cormorant)' }}
+                    >
+                      {emptyMessage.title}
+                    </p>
+                    <p className="text-[13px] text-center" style={{ color: 'var(--text-secondary)' }}>
+                      {emptyMessage.sub}
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key={activeTab + search}
+                    variants={listVariants}
+                    initial="hidden"
+                    animate="show"
+                    className="space-y-3"
+                  >
+                    {filtered.map(mosque => {
+                      const isFollowed = followed.has(mosque.id)
+                      const isSelected = selected?.id === mosque.id
+                      const isLoading = loadingId === mosque.id
+
+                      return (
+                        <motion.div
+                          key={mosque.id}
+                          variants={cardVariants}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setSelected(mosque)}
+                          className="flex items-center gap-3 rounded-2xl p-4 cursor-pointer transition-colors"
+                          style={{
+                            background: 'var(--surface-raised)',
+                            border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--border)'}`,
+                          }}
+                        >
+                          {/* Initial circle */}
+                          <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-[15px] font-semibold"
+                            style={{
+                              background: 'var(--primary-muted)',
+                              color: 'var(--primary)',
+                              fontFamily: 'var(--font-cormorant)',
+                            }}
+                          >
+                            {mosque.name.slice(0, 2).toUpperCase()}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className="text-[15px] font-semibold truncate"
+                              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-jakarta)' }}
+                            >
+                              {mosque.name}
+                            </p>
+                            <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                              {mosque.zone_code ?? 'Malaysia'}
+                              {mosque.jemaah_count ? ` · ${formatCount(mosque.jemaah_count)} ahli` : ''}
+                            </p>
+                          </div>
+
+                          {/* Follow pill */}
+                          <motion.button
+                            whileTap={{ scale: 0.96 }}
+                            onClick={e => toggleFollow(e, mosque)}
+                            disabled={isLoading}
+                            className="shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors"
+                            style={{
+                              fontFamily: 'var(--font-jakarta)',
+                              ...(isFollowed
+                                ? {
+                                    background: 'var(--primary-muted)',
+                                    color: 'var(--primary)',
+                                    border: '1px solid var(--primary-muted)',
+                                  }
+                                : {
+                                    background: 'transparent',
+                                    color: 'var(--text-secondary)',
+                                    border: '1px solid var(--border)',
+                                  }),
+                            }}
+                          >
+                            {isLoading ? '···' : isFollowed ? 'Diikuti ✓' : 'Ikut'}
+                          </motion.button>
+                        </motion.div>
+                      )
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-        </main>
+
+          {/* ══════════════════════════════════════════
+              RIGHT PANEL — mosque detail (desktop only)
+          ══════════════════════════════════════════ */}
+          <div className="hidden md:flex flex-1 items-center justify-center p-8">
+            {selected ? (
+              <div className="w-full max-w-md">
+                <div
+                  className="rounded-3xl overflow-hidden"
+                  style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)' }}
+                >
+                  {/* Mini banner */}
+                  <div
+                    className="h-28 flex items-end p-5"
+                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #0F3D26 100%)' }}
+                  >
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest mb-1"
+                        style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        {selected.zone_code ?? 'Malaysia'}
+                      </p>
+                      <h2
+                        className="text-white text-[26px] font-bold leading-tight"
+                        style={{ fontFamily: 'var(--font-cormorant)' }}
+                      >
+                        {selected.name}
+                      </h2>
+                    </div>
+                  </div>
+
+                  {/* Detail body */}
+                  <div className="p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
+                        {formatCount(selected.jemaah_count)} ahli jemaah
+                      </p>
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        onClick={e => toggleFollow(e, selected)}
+                        disabled={loadingId === selected.id}
+                        className="px-4 py-2 rounded-full text-[13px] font-semibold"
+                        style={{
+                          fontFamily: 'var(--font-jakarta)',
+                          ...(followed.has(selected.id)
+                            ? { background: 'var(--primary-muted)', color: 'var(--primary)', border: '1px solid var(--primary-muted)' }
+                            : { background: 'var(--primary)', color: '#ffffff' }),
+                        }}
+                      >
+                        {loadingId === selected.id ? '···' : followed.has(selected.id) ? 'Diikuti ✓' : '+ Ikut'}
+                      </motion.button>
+                    </div>
+
+                    <Link
+                      href={`/masjid/${selected.slug}`}
+                      className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-[14px] font-semibold transition-colors"
+                      style={{
+                        background: 'var(--surface-overlay)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border)',
+                        fontFamily: 'var(--font-jakarta)',
+                      }}
+                    >
+                      Lihat Profil Penuh →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                  style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)' }}
+                >
+                  <Landmark size={28} strokeWidth={1.2} style={{ color: 'var(--text-disabled)' }} />
+                </div>
+                <p
+                  className="text-[24px] font-semibold"
+                  style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-cormorant)' }}
+                >
+                  Pilih Masjid
+                </p>
+                <p className="text-[13px] max-w-[180px]" style={{ color: 'var(--text-secondary)' }}>
+                  Pilih masjid dari senarai untuk melihat profil
+                </p>
+              </div>
+            )}
+          </div>
+
+        </div>
 
         <BottomNav />
       </div>

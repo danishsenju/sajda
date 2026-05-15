@@ -9,21 +9,30 @@ export default async function MasjidPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  /* ── Followed mosques for the Diikuti section ── */
-  const { data: follows } = await (supabase as any)
+  /* ── All mosques ── */
+  const { data: mosquesData } = await (supabase as any)
+    .from('masjid')
+    .select('id, name, slug, zone_code, jemaah_count')
+    .order('name')
+
+  const mosques = ((mosquesData ?? []) as any[]).map((m) => ({
+    id:            String(m.id),
+    name:          String(m.name),
+    slug:          String(m.slug ?? m.id),
+    zone_code:     m.zone_code ?? null,
+    jemaah_count:  Number(m.jemaah_count ?? 0),
+  }))
+
+  /* ── Followed IDs ── */
+  const { data: followsData } = await (supabase as any)
     .from('jemaah_follows')
-    .select('mosque_id, mosques(id, name, theme_color)')
+    .select('masjid_id')
     .eq('user_id', user.id)
 
-  const followed = ((follows ?? []) as any[])
-    .map((f: any) => f.mosques)
+  const followedIds: string[] = ((followsData ?? []) as any[])
+    .map((f) => f.masjid_id)
     .filter(Boolean)
-    .map((m: any, i: number) => ({
-      id: m.id,
-      name: m.name,
-      initials: m.name.charAt(0).toUpperCase(),
-      color: m.theme_color ?? ['#2D6A4F', '#C9A84C', '#4B6CB7'][i % 3],
-    }))
+    .map(String)
 
-  return <MasjidContent followedMosques={followed.length > 0 ? followed : undefined} />
+  return <MasjidContent mosques={mosques} followedIds={followedIds} />
 }

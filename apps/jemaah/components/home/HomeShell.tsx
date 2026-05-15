@@ -1,443 +1,535 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MosqueSwitcher } from './MosqueSwitcher'
+import Link from 'next/link'
+import { CheckSquare, Heart, Users, ChevronRight, Landmark } from 'lucide-react'
+import { QuranIcon }       from '@/components/icons/quran-icon'
+import { SolatStreakIcon } from '@/components/icons/solat-streak-icon'
+import { TasbihIcon }      from '@/components/icons/tasbih-icon'
+import { QiblaIcon }       from '@/components/icons/qibla-icon'
+import { TazkirahIcon }    from '@/components/icons/tazkirah-icon'
 import { PrayerBanner } from './PrayerBanner'
 import { FeedCard } from './FeedCard'
+import { EmptyState } from './EmptyState'
+import { MosqueSwitcher } from './MosqueSwitcher'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { Sidebar } from '@/components/ui/Sidebar'
-import type { FollowedMosque } from './MosqueSwitcher'
+import { LogoTopBar } from '@/components/ui/LogoTopBar'
 import type { FeedItem } from './FeedCard'
+import type { FollowedMosque } from './MosqueSwitcher'
 import type { TazkirahItem } from '@/app/actions/tazkirah'
 import type { QuranBookmark } from '@/app/actions/quran'
-import { SajdaLogo } from '@/components/icons/sajda-logo'
-import {
-  Bell,
-  Landmark,
-  Clock,
-  ListChecks,
-  ChevronRight,
-  MessageSquare,
-} from 'lucide-react'
-import { TasbihIcon } from '@/components/icons/tasbih-icon'
-import { QiblaIcon } from '@/components/icons/qibla-icon'
-import { QuranIcon } from '@/components/icons/quran-icon'
-import { SolatStreakIcon } from '@/components/icons/solat-streak-icon'
-import { HadisIcon } from '@/components/icons/hadis-icon'
-import { TazkirahIcon } from '@/components/icons/tazkirah-icon'
 
-/* ─── Quick actions ──────────────────────────────────────────────────────── */
+/* ─── Animation ──────────────────────────────────────────────────────────── */
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+}
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 500, damping: 35 } },
+}
+
+/* ─── Quick Actions (per pages-spec.md) ──────────────────────────────────── */
 
 const QUICK_ACTIONS = [
-  {
-    href: '/ibadah/tasbih',
-    label: 'Tasbih',
-    icon: <TasbihIcon size={22} className="text-[var(--accent-2)]" />,
-  },
-  {
-    href: '/ibadah/qibla',
-    label: 'Qiblat',
-    icon: <QiblaIcon size={22} className="text-[var(--accent-2)]" />,
-  },
-  {
-    href: '/ibadah/quran',
-    label: 'Al-Quran',
-    icon: <QuranIcon size={22} className="text-[var(--accent-2)]" />,
-  },
-  {
-    href: '/ibadah/solat',
-    label: 'Streak',
-    icon: <SolatStreakIcon size={22} className="text-[var(--accent-2)]" />,
-  },
-  {
-    href: '/ibadah/hadis',
-    label: 'Hadis',
-    icon: <HadisIcon size={22} className="text-[var(--accent-2)]" />,
-  },
-  {
-    href: '/ibadah/mathurat',
-    label: 'Mathurat',
-    icon: <Clock size={22} strokeWidth={1.5} color="var(--accent-2)" />,
-  },
-  {
-    href: '/ibadah/checklist',
-    label: 'Senarai',
-    icon: <ListChecks size={22} strokeWidth={1.5} color="var(--accent-2)" />,
-  },
-  {
-    href: '/ibadah/tazkirah',
-    label: 'Tazkirah',
-    icon: <TazkirahIcon size={22} className="text-[var(--accent-2)]" />,
-  },
+  { href: '/ibadah/quran',     label: 'Al-Quran',      Icon: QuranIcon },
+  { href: '/ibadah/solat',     label: 'Waktu Solat',   Icon: SolatStreakIcon },
+  { href: '/ibadah/tasbih',    label: 'Tasbih',        Icon: TasbihIcon },
+  { href: '/ibadah/qibla',     label: 'Kiblat',        Icon: QiblaIcon },
+  { href: '/ibadah/checklist', label: 'Senarai Semak', Icon: CheckSquare },
+  { href: '/ibadah/tazkirah',  label: 'Tazkirah',      Icon: TazkirahIcon },
+  { href: '/doa',              label: 'Doa Bersama',   Icon: Heart },
+  { href: '/komuniti',         label: 'Komuniti',      Icon: Users },
 ]
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 
-function hexToRgba(hex: string, alpha: number): string {
-  const clean = hex.startsWith('#') ? hex.slice(1) : hex
-  if (clean.length !== 6) return `rgba(0,0,0,${alpha})`
-  const r = parseInt(clean.slice(0, 2), 16)
-  const g = parseInt(clean.slice(2, 4), 16)
-  const b = parseInt(clean.slice(4, 6), 16)
-  return `rgba(${r},${g},${b},${alpha})`
+function getInitials(name: string | null): string {
+  if (!name) return '?'
+  const parts = name.trim().split(' ')
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase()
 }
 
 const LS_KEY = 'sajda_active_mosque_id'
-const DEFAULT_ACCENT = '#1E3828'
 
 /* ─── Props ──────────────────────────────────────────────────────────────── */
 
 type Props = {
+  userProfile: { display_name: string | null; avatar_url: string | null }
   mosques: FollowedMosque[]
   feed: FeedItem[]
-  tazkirah?: TazkirahItem | null
-  quranBookmark?: QuranBookmark | null
+  tazkirah: TazkirahItem | null
+  quranBookmark: QuranBookmark | null
+}
+
+/* ─── Sub-components ─────────────────────────────────────────────────────── */
+
+function QuickActionsGrid() {
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h2
+          className="text-[20px] font-semibold"
+          style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-cormorant)' }}
+        >
+          Ibadah Hari Ini
+        </h2>
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        {QUICK_ACTIONS.map(({ href, label, Icon }) => (
+          <motion.a
+            key={href}
+            href={href}
+            whileTap={{ scale: 0.94 }}
+            className="flex flex-col items-center justify-center gap-2 rounded-2xl py-4 px-2"
+            style={{
+              background: 'var(--surface-raised)',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--shadow-sm)',
+              minHeight: '72px',
+            }}
+          >
+            <div style={{ color: 'var(--primary)' }}><Icon size={22} /></div>
+            <span
+              className="text-[11px] font-semibold text-center leading-tight"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {label}
+            </span>
+          </motion.a>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function TazkirahCard({ tazkirah }: { tazkirah: TazkirahItem }) {
+  return (
+    <motion.a
+      href="/ibadah/tazkirah"
+      whileTap={{ scale: 0.98 }}
+      className="block rounded-2xl overflow-hidden"
+      style={{
+        background: 'var(--surface-raised)',
+        borderTop: '1px solid var(--border)',
+        borderRight: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
+        borderLeft: '4px solid var(--gold)',
+        boxShadow: 'var(--shadow-gold)',
+      }}
+    >
+      <div className="p-5">
+        {tazkirah.category && (
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wider mb-2"
+            style={{ color: 'var(--gold)' }}
+          >
+            {tazkirah.category}
+          </p>
+        )}
+        <p
+          className="text-[18px] font-semibold italic leading-snug mb-3"
+          style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-cormorant)' }}
+        >
+          &ldquo;{tazkirah.title}&rdquo;
+        </p>
+        <p
+          className="text-[13px] leading-relaxed line-clamp-3"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          {tazkirah.content_malay}
+        </p>
+        {tazkirah.hadis_ref && (
+          <p
+            className="mt-3 text-[11px]"
+            style={{ color: 'var(--text-disabled)' }}
+          >
+            — {tazkirah.hadis_ref}
+          </p>
+        )}
+      </div>
+    </motion.a>
+  )
+}
+
+function QuranContinueCard({ quranBookmark }: { quranBookmark: QuranBookmark }) {
+  return (
+    <motion.a
+      href={`/ibadah/quran?page=${quranBookmark.page_number}`}
+      whileTap={{ scale: 0.98 }}
+      className="flex items-center gap-3 rounded-xl p-4"
+      style={{
+        background: 'var(--surface-raised)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)',
+      }}
+    >
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ background: 'var(--primary-muted)' }}
+      >
+        <div style={{ color: 'var(--primary)' }}><QuranIcon size={18} /></div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p
+          className="text-[14px] font-semibold"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          Sambung Membaca
+        </p>
+        <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+          Al-Quran · Halaman {quranBookmark.page_number}
+        </p>
+      </div>
+      <ChevronRight size={16} strokeWidth={1.5} color="var(--text-disabled)" />
+    </motion.a>
+  )
 }
 
 /* ─── HomeShell ──────────────────────────────────────────────────────────── */
 
-export function HomeShell({ mosques, feed, tazkirah, quranBookmark }: Props) {
-  const [selectedMosqueId, setSelectedMosqueId] = useState<string | null>(null)
-
-  useEffect(() => {
+export function HomeShell({ userProfile, mosques, feed, tazkirah, quranBookmark }: Props) {
+  const [selectedMosqueId, setSelectedMosqueId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
     const saved = localStorage.getItem(LS_KEY)
-    if (saved && mosques.some((m) => m.id === saved)) {
-      setSelectedMosqueId(saved)
-      const mosque = mosques.find((m) => m.id === saved)
-      if (mosque?.theme.primary) applyTheme(mosque.theme.primary)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  function applyTheme(color: string) {
-    const root = document.documentElement
-    root.style.setProperty('--accent', color)
-    root.style.setProperty('--accent-soft', hexToRgba(color, 0.12))
-    root.style.setProperty('--border-accent', hexToRgba(color, 0.25))
-  }
-
-  function resetTheme() {
-    const root = document.documentElement
-    root.style.setProperty('--accent', DEFAULT_ACCENT)
-    root.style.setProperty('--accent-soft', hexToRgba(DEFAULT_ACCENT, 0.12))
-    root.style.setProperty('--border-accent', hexToRgba(DEFAULT_ACCENT, 0.25))
-  }
+    return saved && mosques.some((m) => m.id === saved) ? saved : null
+  })
 
   function handleMosqueSelect(id: string | null) {
     setSelectedMosqueId(id)
-    if (id === null) {
-      localStorage.removeItem(LS_KEY)
-      resetTheme()
-    } else {
-      localStorage.setItem(LS_KEY, id)
-      const mosque = mosques.find((m) => m.id === id)
-      if (mosque?.theme.primary) applyTheme(mosque.theme.primary)
-    }
+    if (id === null) localStorage.removeItem(LS_KEY)
+    else localStorage.setItem(LS_KEY, id)
   }
 
-  const announcements = feed.filter((item) => item.kind === 'announcement')
-  const visibleFeed = selectedMosqueId
-    ? announcements.filter((item) => item.mosqueId === selectedMosqueId)
-    : announcements
-
   const hasFollowed = mosques.length > 0
+  const firstName = userProfile.display_name?.split(' ')[0] ?? null
+
+  const [timeGreeting] = useState(() => {
+    const h = new Date().getHours()
+    if (h < 5)  return 'Selamat Malam'
+    if (h < 12) return 'Selamat Pagi'
+    if (h < 15) return 'Selamat Tengah Hari'
+    if (h < 19) return 'Selamat Petang'
+    return 'Selamat Malam'
+  })
+
+  const [dateStr] = useState(() => {
+    const now = new Date()
+    const masihi = now.toLocaleDateString('ms-MY', {
+      weekday: 'long', day: 'numeric', month: 'long',
+    })
+    let hijri = ''
+    try {
+      hijri = now.toLocaleDateString('ms-MY-u-ca-islamic-umalqura', {
+        day: 'numeric', month: 'long', year: 'numeric',
+      })
+    } catch { /* browser may not support Islamic calendar */ }
+    return hijri ? `${masihi} · ${hijri}H` : masihi
+  })
+
+  const visibleFeed = selectedMosqueId
+    ? feed.filter((f) => f.kind === 'announcement' && f.mosqueId === selectedMosqueId)
+    : feed.filter((f) => f.kind === 'announcement')
+
   const selectedMosque = mosques.find((m) => m.id === selectedMosqueId)
 
   return (
     <div className="flex min-h-dvh" style={{ background: 'var(--surface)' }}>
+      <Sidebar />
 
-      {/* ── Desktop sidebar ────────────────────────────────────────── */}
-      <Sidebar
-        mosques={mosques}
-        selectedId={selectedMosqueId}
-        onMosqueSelect={handleMosqueSelect}
-      />
-
-      {/* ── Main content ───────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col md:ml-[240px]">
-
-        {/* ── Mobile header ─────────────────────────────────────────── */}
-        <header
-          className="md:hidden sticky top-0 z-30 safe-top"
-          style={{ background: 'var(--surface-2)', borderBottom: 'none' }}
+      <div className="flex-1 min-w-0 md:ml-60">
+        <LogoTopBar />
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="pt-14 pb-28 md:pt-0 md:pb-12"
         >
-          <div className="flex items-center justify-between px-5 h-14">
+          <div className="md:max-w-5xl md:mx-auto md:px-8 md:pt-8">
 
-            {/* Logo */}
-            <SajdaLogo width={80} height={34} className="text-[var(--text)]" />
-
-            {/* Mosque switcher pill */}
-            {hasFollowed && (
-              <MosqueSwitcher
-                mosques={mosques}
-                selectedId={selectedMosqueId}
-                onSelect={handleMosqueSelect}
-                variant="header"
-              />
-            )}
-
-            {/* Notification bell */}
-            <button
-              className="w-11 h-11 flex items-center justify-center rounded-full relative"
-              aria-label="Pemberitahuan"
+            {/* ── Mobile greeting ────────────────────────────────────── */}
+            <motion.div
+              variants={item}
+              className="md:hidden relative px-4 pt-6 pb-4 overflow-hidden"
             >
-              <Bell size={20} strokeWidth={1.5} color="var(--text)" />
-              <span
-                className="absolute top-2 right-2 w-2 h-2 rounded-full"
-                style={{ background: 'var(--error)', border: '1.5px solid var(--surface-2)' }}
+              {/* Ambient green radial glow */}
+              <div
+                className="absolute -top-6 -right-6 w-56 h-48 pointer-events-none"
+                style={{
+                  background: 'radial-gradient(ellipse at 80% 20%, rgba(30,107,69,0.10) 0%, transparent 65%)',
+                }}
               />
-            </button>
-          </div>
-        </header>
 
-        {/* ── Page content ──────────────────────────────────────────── */}
-        <main className="flex-1 pb-24 md:pb-10">
-          <div className="md:max-w-[900px] md:mx-auto md:px-8 md:py-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
 
-            {/* Prayer times — always visible */}
-            <PrayerBanner />
+                  {/* Time-of-day pill */}
+                  <div className="mb-3">
+                    <span
+                      className="inline-flex items-center text-[11px] font-semibold tracking-wide px-2.5 py-1 rounded-full"
+                      style={{ background: 'var(--primary-muted)', color: 'var(--primary)' }}
+                    >
+                      {timeGreeting}
+                    </span>
+                  </div>
 
-            {/* Akses Pantas */}
-            <div className="px-5 mt-6 md:px-0">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-1 h-4 rounded-full" style={{ background: 'linear-gradient(180deg, #C9A84C, rgba(201,168,76,0.3))' }} />
+                  {/* Assalamualaikum */}
                   <p
-                    className="text-[12px] font-semibold uppercase tracking-[0.08em]"
-                    style={{ color: 'var(--text-dim)' }}
+                    className="text-[17px] italic leading-snug"
+                    style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-cormorant)' }}
                   >
-                    Akses Pantas
+                    Assalamualaikum,
+                  </p>
+
+                  {/* Name — the hero */}
+                  <h1
+                    className="text-[32px] font-bold leading-tight"
+                    style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-cormorant)' }}
+                  >
+                    {firstName ?? 'Sahabat'}
+                  </h1>
+
+                  {/* Date row */}
+                  <p
+                    className="text-[11px] mt-1.5 tabular-nums"
+                    style={{ color: 'var(--text-disabled)' }}
+                  >
+                    {dateStr}
                   </p>
                 </div>
-                <span
-                  className="text-[10px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full"
-                  style={{
-                    color: 'rgba(201,168,76,0.8)',
-                    background: 'rgba(201,168,76,0.08)',
-                    border: '1px solid rgba(201,168,76,0.15)',
-                  }}
-                >
-                  8 Alat
-                </span>
-              </div>
-              <div className="grid grid-cols-4 gap-2 md:gap-3">
-                {QUICK_ACTIONS.map((action) => (
-                  <a
-                    key={action.href}
-                    href={action.href}
-                    className="relative flex flex-col items-center gap-2.5 py-4 px-2 rounded-[18px] transition-all duration-200 active:scale-[0.94] overflow-hidden"
-                    style={{
-                      background: 'var(--surface-2)',
-                      border: '1px solid var(--border)',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                    }}
-                  >
-                    {/* Gold shimmer top line */}
-                    <div
-                      className="absolute inset-x-0 top-0 h-px"
-                      style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(201,168,76,0.55) 50%, transparent 95%)' }}
-                    />
 
-                    {/* Icon glow container */}
+                {/* Avatar — larger, with green glow ring */}
+                <Link href="/profil">
+                  <motion.div
+                    whileTap={{ scale: 0.92, transition: { type: 'spring', stiffness: 380, damping: 28 } }}
+                    className="relative mt-2 flex-shrink-0"
+                  >
                     <div
-                      className="w-11 h-11 rounded-[13px] flex items-center justify-center"
+                      className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center"
                       style={{
-                        background: 'var(--surface-3)',
-                        border: '1px solid var(--border)',
+                        background: 'var(--primary-muted)',
+                        border: '2px solid var(--primary)',
+                        boxShadow: '0 0 20px rgba(30,107,69,0.20)',
                       }}
                     >
-                      {action.icon}
+                      {userProfile.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={userProfile.avatar_url}
+                          alt={userProfile.display_name ?? ''}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span
+                          className="text-[17px] font-bold"
+                          style={{ color: 'var(--primary)' }}
+                        >
+                          {getInitials(userProfile.display_name)}
+                        </span>
+                      )}
                     </div>
-
-                    <span
-                      className="text-[11px] font-semibold text-center leading-tight tracking-[0.02em]"
-                      style={{ color: 'var(--text)' }}
-                    >
-                      {action.label}
-                    </span>
-                  </a>
-                ))}
+                    {/* Online dot */}
+                    <div
+                      className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full border-2"
+                      style={{ background: 'var(--primary)', borderColor: 'var(--surface)' }}
+                    />
+                  </motion.div>
+                </Link>
               </div>
-            </div>
+            </motion.div>
 
-            {/* ── Tazkirah Harian card ─────────────────────────────── */}
-            {tazkirah && (
-              <a
-                href="/ibadah/tazkirah"
-                className="block mx-5 mt-5 rounded-2xl overflow-hidden active:scale-[0.98] transition-transform md:mx-0"
-                style={{
-                  background: 'var(--surface-2)',
-                  border: '1px solid var(--border-strong)',
-                }}
-              >
-                <div
-                  className="px-4 py-3 flex items-center justify-between"
-                  style={{ borderBottom: '1px solid var(--border)' }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--warning)' }} />
-                    <span
-                      className="text-[12px] font-medium uppercase tracking-[0.05em]"
-                      style={{ color: 'var(--text-dim)' }}
-                    >
-                      Tazkirah Hari Ini
-                    </span>
-                  </div>
-                  {tazkirah.category && (
-                    <span
-                      className="text-[11px] font-medium px-2.5 py-1 rounded-full"
-                      style={{ background: 'var(--primary-soft)', color: 'var(--primary)' }}
-                    >
-                      {tazkirah.category}
-                    </span>
-                  )}
-                </div>
-                <div className="px-4 py-4">
-                  <p
-                    className="text-[16px] font-semibold mb-1.5 leading-snug"
-                    style={{ color: 'var(--text)' }}
-                  >
-                    {tazkirah.title}
-                  </p>
-                  <p
-                    className="text-[14px] leading-relaxed line-clamp-2"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    {tazkirah.content_malay}
-                  </p>
-                </div>
-              </a>
-            )}
+            {/* ── Two-column desktop / single-column mobile ──────────── */}
+            <div className="md:grid md:grid-cols-3 md:gap-6 md:items-start">
 
-            {/* ── Teruskan Membaca ─────────────────────────────────── */}
-            {quranBookmark && (
-              <a
-                href={`/ibadah/quran?page=${quranBookmark.page_number}`}
-                className="mx-5 mt-3 flex items-center gap-3 px-4 py-3.5 rounded-2xl active:scale-[0.98] transition-transform md:mx-0"
-                style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)' }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'var(--surface-3)' }}
-                >
-                  <QuranIcon size={16} className="text-[var(--accent-2)]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold" style={{ color: 'var(--text)' }}>
-                    Teruskan Membaca
-                  </p>
-                  <p className="text-[12px]" style={{ color: 'var(--text-dim)' }}>
-                    Al-Quran · Halaman {quranBookmark.page_number}
-                  </p>
-                </div>
-                <ChevronRight size={16} strokeWidth={1.5} color="var(--text-dim)" />
-              </a>
-            )}
+              {/* ═══ LEFT COLUMN (col-span-2) ═══════════════════════════ */}
+              <div className="md:col-span-2 md:space-y-6">
 
-            {/* ── Siaran Masjid / CTA ───────────────────────────────── */}
-            {!hasFollowed ? (
-              <div
-                className="mx-5 mt-5 md:mx-0 rounded-2xl p-6 text-center"
-                style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)' }}
-              >
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
-                  style={{ background: 'var(--surface-3)' }}
-                >
-                  <Landmark size={22} strokeWidth={1.5} color="var(--accent-2)" />
-                </div>
-                <p
-                  className="text-[16px] font-semibold mb-2"
-                  style={{ color: 'var(--text)' }}
-                >
-                  Ikuti masjid anda
-                </p>
-                <p
-                  className="text-[14px] mb-5 leading-relaxed"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  Dapatkan siaran, program dan jadual masjid terus di sini.
-                </p>
-                <a
-                  href="/masjid"
-                  className="flex items-center justify-center w-full h-12 rounded-xl text-[15px] font-semibold transition-all active:scale-95"
-                  style={{ background: 'var(--primary)', color: 'var(--surface)' }}
-                >
-                  Cari Masjid
-                </a>
-              </div>
-            ) : (
-              <>
-                {/* Section header */}
-                <div className="flex items-center justify-between px-5 mt-6 mb-3 md:px-0">
-                  <div>
-                    <p
-                      className="text-[12px] font-medium uppercase tracking-[0.05em] mb-0.5"
-                      style={{ color: 'var(--text-dim)' }}
-                    >
-                      Siaran Masjid
-                    </p>
-                    <h2 className="text-[15px] font-semibold" style={{ color: 'var(--text)' }}>
-                      {selectedMosque?.name ?? 'Semua Masjid'}
-                    </h2>
-                  </div>
-                  {visibleFeed.length > 0 && (
-                    <span
-                      className="text-[12px] px-2.5 py-1 rounded-full font-medium"
-                      style={{ background: 'var(--surface-3)', color: 'var(--text-dim)' }}
-                    >
-                      {visibleFeed.length} siaran
-                    </span>
-                  )}
-                </div>
+                {/* Prayer Banner — the hero */}
+                <motion.div variants={item} className="px-4 md:px-0">
+                  <PrayerBanner />
+                </motion.div>
 
-                {/* Feed */}
-                <AnimatePresence mode="wait">
-                  {visibleFeed.length === 0 ? (
-                    <motion.div
-                      key="empty"
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      className="flex flex-col items-center justify-center py-12 px-8 text-center"
-                    >
-                      <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
-                        style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)' }}
-                      >
-                        <MessageSquare size={20} strokeWidth={1.5} color="var(--text-dim)" />
+                {/* Mosque Feed section */}
+                <motion.div variants={item} className="mt-8 md:mt-0">
+                  {!hasFollowed ? (
+                    <>
+                      {/* Mobile — full centred empty state */}
+                      <div className="md:hidden">
+                        <EmptyState />
                       </div>
-                      <p className="text-[14px] font-medium" style={{ color: 'var(--text-muted)' }}>
-                        Tiada siaran dari masjid ini lagi.
-                      </p>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key={selectedMosqueId ?? 'all'}
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                      transition={{ duration: 0.18 }}
-                      className="flex flex-col gap-3 px-5 md:px-0 md:grid md:grid-cols-2 md:items-start md:gap-4"
-                    >
-                      {visibleFeed.map((item, i) => (
-                        <FeedCard key={item.id} item={item} index={i} />
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
 
-                {visibleFeed.length > 0 && (
-                  <div className="flex items-center justify-center gap-3 py-8">
-                    <div className="h-px w-10" style={{ background: 'var(--border-strong)' }} />
-                    <span className="text-[12px]" style={{ color: 'var(--text-dim)' }}>
-                      Itu sahaja buat masa ini
-                    </span>
-                    <div className="h-px w-10" style={{ background: 'var(--border-strong)' }} />
-                  </div>
-                )}
-              </>
+                      {/* Desktop — compact, left-aligned inside col-span-2 */}
+                      <div className="hidden md:flex items-center gap-5 px-0 py-8">
+                        <div
+                          className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)' }}
+                        >
+                          <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
+                            <path d="M12 96H108" stroke="var(--border-strong)" strokeWidth="1.5" strokeLinecap="round"/>
+                            <path d="M60 14C60 14 33 38 33 58C33 73.46 45.54 86 61 86C76.46 86 88 73.46 88 58C88 38 60 14 60 14Z"
+                              fill="var(--primary)" opacity="0.20"/>
+                            <path d="M52 70V62C52 59.24 54.24 57 57 57H64C66.76 57 69 59.24 69 62V70" stroke="var(--primary)" strokeWidth="1.5" opacity="0.40"/>
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3
+                            className="text-[18px] font-semibold mb-1"
+                            style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-cormorant)' }}
+                          >
+                            Sambungkan Diri Anda
+                          </h3>
+                          <p className="text-[13px] leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
+                            Ikuti masjid berdekatan untuk menerima pengumuman dan aktiviti komuniti anda.
+                          </p>
+                          <Link
+                            href="/masjid"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold"
+                            style={{ background: 'var(--primary)', color: '#ffffff' }}
+                          >
+                            Cari Masjid Berdekatan
+                          </Link>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Section header */}
+                      <div className="flex items-center justify-between px-4 md:px-0 mb-4">
+                        <div>
+                          <h2
+                            className="text-[20px] font-semibold"
+                            style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-cormorant)' }}
+                          >
+                            {selectedMosque?.name ?? 'Daripada Masjid Anda'}
+                          </h2>
+                          {selectedMosque && (
+                            <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-disabled)' }}>
+                              {visibleFeed.length} siaran
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {mosques.length > 1 && (
+                            <MosqueSwitcher
+                              mosques={mosques}
+                              selectedId={selectedMosqueId}
+                              onSelect={handleMosqueSelect}
+                              variant="header"
+                            />
+                          )}
+                          <Link
+                            href="/masjid"
+                            className="text-[13px] font-medium"
+                            style={{ color: 'var(--primary)' }}
+                          >
+                            Lihat Semua
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Feed content */}
+                      <AnimatePresence mode="wait">
+                        {visibleFeed.length === 0 ? (
+                          <motion.div
+                            key="empty-feed"
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="flex flex-col items-center py-10 px-6 text-center"
+                          >
+                            <Landmark
+                              size={28} strokeWidth={1.2}
+                              color="var(--text-disabled)"
+                              className="mb-3"
+                            />
+                            <p
+                              className="text-[16px] font-semibold"
+                              style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-cormorant)' }}
+                            >
+                              Belum ada pengumuman
+                            </p>
+                            <p className="mt-1 text-[13px]" style={{ color: 'var(--text-secondary)' }}>
+                              Masjid anda belum ada kemas kini baru
+                            </p>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key={selectedMosqueId ?? 'all'}
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {/* Mobile: horizontal scroll */}
+                            <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-4 px-4 snap-x snap-mandatory md:hidden">
+                              {visibleFeed.map((feedItem, i) => (
+                                <div
+                                  key={feedItem.id}
+                                  className="snap-start shrink-0 w-[75vw] max-w-[280px]"
+                                >
+                                  <FeedCard item={feedItem} index={i} />
+                                </div>
+                              ))}
+                              <div className="shrink-0 w-4" />
+                            </div>
+
+                            {/* Desktop: 2-col grid */}
+                            <div className="hidden md:grid md:grid-cols-2 md:gap-4">
+                              {visibleFeed.map((feedItem, i) => (
+                                <FeedCard key={feedItem.id} item={feedItem} index={i} />
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {visibleFeed.length > 0 && (
+                        <div className="flex items-center justify-center gap-3 py-8 px-4 md:px-0">
+                          <div className="h-px flex-1 max-w-[40px]" style={{ background: 'var(--border-strong)' }} />
+                          <span className="text-[12px]" style={{ color: 'var(--text-disabled)' }}>
+                            Itu sahaja buat masa ini
+                          </span>
+                          <div className="h-px flex-1 max-w-[40px]" style={{ background: 'var(--border-strong)' }} />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </motion.div>
+
+              </div>{/* end left column */}
+
+              {/* ═══ RIGHT COLUMN — desktop only ════════════════════════ */}
+              <div className="hidden md:flex md:flex-col md:gap-4">
+                <QuickActionsGrid />
+                {quranBookmark && <QuranContinueCard quranBookmark={quranBookmark} />}
+                {tazkirah && <TazkirahCard tazkirah={tazkirah} />}
+              </div>
+
+            </div>{/* end grid */}
+
+            {/* ── Mobile-only sections (after feed) ─────────────────── */}
+
+            {/* Quick Actions */}
+            <motion.div variants={item} className="mt-8 px-4 md:hidden">
+              <QuickActionsGrid />
+            </motion.div>
+
+            {/* Tazkirah — the ONE gold element on this screen */}
+            {tazkirah && (
+              <motion.div variants={item} className="mt-8 px-4 md:hidden">
+                <TazkirahCard tazkirah={tazkirah} />
+              </motion.div>
+            )}
+
+            {/* Quran Continue */}
+            {quranBookmark && (
+              <motion.div variants={item} className="mt-3 px-4 md:hidden">
+                <QuranContinueCard quranBookmark={quranBookmark} />
+              </motion.div>
             )}
 
           </div>
-        </main>
+        </motion.div>
 
         <BottomNav />
       </div>

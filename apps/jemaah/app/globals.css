@@ -207,3 +207,13 @@ body {
 /* ─── Scrollbar hide ──────────────────────────────────────────────────────── */
 .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* ─── Bottom Nav surface (solid, not transparent glass) ───────────────────── */
+.bottom-nav-surface {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-theme="dark"] .bottom-nav-surface {
+  background: rgba(24, 33, 24, 0.92);
+}

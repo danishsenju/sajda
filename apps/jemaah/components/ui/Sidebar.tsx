@@ -4,9 +4,12 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Home, Landmark, BookOpen, Heart, User, Users, Settings, Sun, Moon } from 'lucide-react'
+import { Bell, Home, Landmark, BookOpen, Heart, User, Users, Settings, Sun, Moon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/browser'
 import { useTheme } from './ThemeProvider'
+import { useNotifications } from '@/hooks/useNotifications'
+import { NotificationPanel } from './NotificationPanel'
+import { SajdaLogo } from '@/components/icons/sajda-logo'
 
 const MAIN_NAV = [
   { href: '/', label: 'Utama', Icon: Home },
@@ -30,6 +33,8 @@ type UserProfile = {
 export function Sidebar() {
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
+  const [notifOpen, setNotifOpen] = useState(false)
+  const { notifications, hasUnread, isLoading: notifLoading, readIds, markRead } = useNotifications()
   const [profile, setProfile] = useState<UserProfile>({
     display_name: null,
     avatar_url: null,
@@ -74,37 +79,31 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div
-        className="flex items-center gap-2.5 px-5 h-16 flex-shrink-0"
+        className="flex items-center px-4 h-16 flex-shrink-0 gap-2"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
       >
-        <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{
-            background: 'rgba(184,134,11,0.12)',
-            border: '1px solid rgba(184,134,11,0.28)',
-          }}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 2C12 2 6 7 6 12.5C6 15.81 8.69 18.5 12 18.5C15.31 18.5 18 15.81 18 12.5C18 7 12 2 12 2Z"
-              fill="rgba(184,134,11,0.25)"
-              stroke="#B8860B"
-              strokeWidth="1.5"
-            />
-            <path
-              d="M4 22V20H20V22"
-              stroke="#B8860B"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+        {/* Logo */}
+        <div className="flex-1 min-w-0">
+          <SajdaLogo width={88} height={37} style={{ color: '#B8860B' }} />
         </div>
-        <span
-          className="text-[22px] font-semibold tracking-[0.12em]"
-          style={{ color: '#B8860B', fontFamily: 'var(--font-cormorant)' }}
+
+        {/* Bell button */}
+        <motion.button
+          whileTap={{ scale: 0.92 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          onClick={() => setNotifOpen(v => !v)}
+          className="relative w-9 h-9 flex items-center justify-center rounded-xl flex-shrink-0"
+          style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.70)' }}
+          aria-label="Pemberitahuan"
         >
-          SAJDA
-        </span>
+          <Bell size={17} />
+          {hasUnread && (
+            <span
+              className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse"
+              aria-hidden="true"
+            />
+          )}
+        </motion.button>
       </div>
 
       {/* Main nav */}
@@ -225,6 +224,15 @@ export function Sidebar() {
           </button>
         </div>
       </div>
+      <NotificationPanel
+        open={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        notifications={notifications}
+        isLoading={notifLoading}
+        readIds={readIds}
+        onMarkRead={markRead}
+        variant="dropdown"
+      />
     </aside>
   )
 }

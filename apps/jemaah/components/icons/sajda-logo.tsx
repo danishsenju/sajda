@@ -1,10 +1,13 @@
+import { CSSProperties } from 'react'
+
 interface SajdaLogoProps {
   width?: number
   height?: number
   className?: string
+  style?: CSSProperties
 }
 
-export function SajdaLogo({ width = 90, height = 38, className = '' }: SajdaLogoProps) {
+export function SajdaLogo({ width = 90, height = 38, className = '', style }: SajdaLogoProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -12,6 +15,7 @@ export function SajdaLogo({ width = 90, height = 38, className = '' }: SajdaLogo
       width={width}
       height={height}
       className={className}
+      style={style}
       fill="currentColor"
       aria-label="SAJDA"
     >

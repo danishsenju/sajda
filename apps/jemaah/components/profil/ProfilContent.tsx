@@ -1,93 +1,57 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { Bell, ChevronRight, Globe, Moon, Sun, User, Landmark, LogOut } from 'lucide-react'
-import { BottomNav } from '@/components/ui/BottomNav'
-import { Sidebar } from '@/components/ui/Sidebar'
-import { useTheme } from '@/components/ui/ThemeProvider'
-import { createClient } from '@/lib/supabase/browser'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/browser'
+import { useTheme } from '@/components/ui/ThemeProvider'
+import { motion } from 'framer-motion'
+import {
+  User,
+  Building2,
+  Bell,
+  Globe,
+  Sun,
+  Moon,
+  ChevronRight,
+} from 'lucide-react'
 
-/* ─── Helpers ────────────────────────────────────────────────────────────── */
-
-function getInitials(email: string, name?: string): string {
-  if (name) {
-    const parts = name.trim().split(' ')
-    return (parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')
-  }
-  return email.slice(0, 2).toUpperCase()
-}
-
-function formatJoinYear(dateStr: string): string {
-  try {
-    return new Date(dateStr).getFullYear().toString()
-  } catch {
-    return '2023'
-  }
-}
-
-/* ─── Settings row ───────────────────────────────────────────────────────── */
-
-function SettingsRow({
-  icon: Icon,
-  label,
-  value,
-  href,
-  badge,
-}: {
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number; color?: string }>
-  label: string
-  value?: string
-  href?: string
-  badge?: number
-}) {
-  const inner = (
-    <div className="flex items-center gap-3 px-4 py-3.5">
-      <div
-        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: 'var(--surface-3)' }}
-      >
-        <Icon size={16} strokeWidth={1.5} color="var(--text-dim)" />
-      </div>
-      <span className="flex-1 text-[14px] font-medium" style={{ color: 'var(--text)' }}>
-        {label}
-      </span>
-      {badge !== undefined && badge > 0 && (
-        <span
-          className="text-[12px] font-semibold px-2 py-0.5 rounded-full mr-1"
-          style={{ background: 'var(--surface-3)', color: 'var(--text)' }}
-        >
-          {badge}
-        </span>
-      )}
-      {value && (
-        <span className="text-[13px] mr-1" style={{ color: 'var(--text-dim)' }}>{value}</span>
-      )}
-      <ChevronRight size={16} strokeWidth={1.5} color="var(--text-dim)" />
-    </div>
-  )
-
-  if (href) {
-    return (
-      <a href={href} className="block transition-colors" style={{ background: 'transparent' }}
-         onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-3)')}
-         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-        {inner}
-      </a>
-    )
-  }
-  return <div className="transition-colors">{inner}</div>
-}
-
-/* ─── ProfilContent ──────────────────────────────────────────────────────── */
-
-type Props = {
+interface Props {
   email: string
   name?: string
   joinedAt: string
   mosqueCount?: number
   doaCount?: number
   streak?: number
+}
+
+function getInitials(name?: string): string {
+  if (!name) return '?'
+  return name
+    .trim()
+    .split(/\s+/)
+    .map(w => w[0]?.toUpperCase() ?? '')
+    .slice(0, 2)
+    .join('')
+}
+
+function formatJoinYear(joinedAt: string): string {
+  return new Date(joinedAt).getFullYear().toString()
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.07, delayChildren: 0.05 },
+  },
+}
+
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring' as const, stiffness: 500, damping: 35 },
+  },
 }
 
 export function ProfilContent({
@@ -100,152 +64,217 @@ export function ProfilContent({
 }: Props) {
   const router = useRouter()
   const { theme, toggleTheme } = useTheme()
-  const initials = getInitials(email, name)
 
   async function handleSignOut() {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
   }
-  const displayName = name ?? email.split('@')[0] ?? 'Pengguna'
+
+  const initials = getInitials(name)
   const joinYear = formatJoinYear(joinedAt)
+  const displayName = name ?? email.split('@')[0]
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
-      <Sidebar mosques={[]} selectedId={null} onMosqueSelect={() => {}} />
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="bg-[--surface]"
+    >
+      <div>
+        <div className="md:grid md:grid-cols-[1fr_2fr] md:gap-6 md:items-start">
 
-      <div className="flex-1 flex flex-col md:ml-[240px]">
+          {/* ── LEFT COLUMN (desktop) / TOP (mobile) ── */}
+          <div className="flex flex-col gap-3">
 
-        {/* ── Avatar ────────────────────────────────────────────────── */}
-        <div className="flex flex-col items-center safe-top pt-16">
-          <div
-            className="w-28 h-28 rounded-full flex items-center justify-center text-[28px] font-bold text-white shadow-lg"
-            style={{
-              background: 'var(--primary)',
-              border: '4px solid var(--warning)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.40)',
-            }}
-          >
-            {initials}
-          </div>
-
-          {/* Name + email */}
-          <div className="text-center mt-3 px-6">
-            <h1 className="text-[20px] font-bold capitalize" style={{ color: 'var(--text)' }}>
-              {displayName}
-            </h1>
-            <p className="text-[13px] mt-0.5" style={{ color: 'var(--text-dim)' }}>
-              {email} · Sertai sejak {joinYear}
-            </p>
-          </div>
-
-          {/* Gold dot */}
-          <div className="w-1.5 h-1.5 rounded-full mt-3" style={{ background: 'var(--warning)' }} />
-        </div>
-
-        {/* ── Stats row ─────────────────────────────────────────────── */}
-        <div className="mx-5 mt-5">
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex divide-x rounded-2xl overflow-hidden"
-            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-          >
-            {[
-              { value: mosqueCount, label: 'MASJID' },
-              { value: doaCount,    label: 'DOA',   accent: false },
-              { value: streak,      label: 'STREAK', gold: true },
-            ].map((s) => (
-              <div key={s.label} className="flex-1 flex flex-col items-center py-4" style={{ borderRight: '1px solid var(--border)' }}>
-                <span
-                  className="text-[22px] font-bold"
-                  style={{ color: s.gold ? 'var(--warning)' : 'var(--text)' }}
-                >
-                  {s.value}
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.1em] mt-0.5" style={{ color: 'var(--text-dim)' }}>
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* ── AKAUN section ─────────────────────────────────────────── */}
-        <div className="mx-5 mt-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2 px-1" style={{ color: 'var(--text-dim)' }}>
-            Akaun
-          </p>
-          <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-            <SettingsRow icon={User} label="Maklumat Peribadi" href="/profil/maklumat" />
-            <div style={{ borderTop: '1px solid var(--border)' }}>
-              <SettingsRow icon={Landmark} label="Masjid Saya" badge={mosqueCount} href="/profil/masjid" />
-            </div>
-            <div style={{ borderTop: '1px solid var(--border)' }}>
-              <SettingsRow icon={Bell} label="Notifikasi" value="Aktif" href="/profil/notifikasi" />
-            </div>
-          </div>
-        </div>
-
-        {/* ── KEUTAMAAN section ─────────────────────────────────────── */}
-        <div className="mx-5 mt-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2 px-1" style={{ color: 'var(--text-dim)' }}>
-            Keutamaan
-          </p>
-          <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-            <SettingsRow icon={Globe} label="Bahasa" value="Bahasa Melayu" />
-            <div style={{ borderTop: '1px solid var(--border)' }}>
-              <button
-                onClick={toggleTheme}
-                className="w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-left"
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-3)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            {/* Section 1 — Profile Hero */}
+            <motion.div
+              variants={item}
+              className="bg-[--surface-raised] border border-[--border] rounded-2xl mx-4 mt-4 p-5 md:mx-0 md:mt-0 flex flex-col items-center gap-3"
+            >
+              <div
+                className="w-20 h-20 rounded-full bg-[--primary] flex items-center justify-center text-white font-cormorant text-2xl font-semibold shrink-0"
+                style={{ boxShadow: '0 0 0 3px var(--gold)' }}
               >
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'var(--surface-3)' }}
-                >
-                  {theme === 'dark'
-                    ? <Moon size={16} strokeWidth={1.5} color="var(--text-dim)" />
-                    : <Sun size={16} strokeWidth={1.5} color="var(--text-dim)" />
-                  }
+                {initials}
+              </div>
+
+              <div className="text-center space-y-0.5">
+                <p className="font-cormorant text-[24px] font-bold leading-tight text-[--text-primary]">
+                  {displayName}
+                </p>
+                <p className="font-jakarta text-xs text-[--text-secondary]">{email}</p>
+                <p className="font-jakarta text-xs text-[--text-secondary]">
+                  Sertai sejak {joinYear}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Section 2 — Stats Row */}
+            <motion.div
+              variants={item}
+              className="bg-[--surface-raised] border border-[--border] rounded-2xl mx-4 md:mx-0"
+            >
+              <div className="grid grid-cols-3">
+                <div className="flex flex-col items-center py-4 px-2 border-r border-[--border]">
+                  <span className="font-cormorant text-[28px] font-bold leading-none text-[--text-primary]">
+                    {mosqueCount}
+                  </span>
+                  <span className="font-jakarta text-[10px] font-medium tracking-widest uppercase text-[--text-secondary] mt-1">
+                    Masjid
+                  </span>
                 </div>
-                <span className="flex-1 text-[14px] font-medium" style={{ color: 'var(--text)' }}>
-                  Mod Paparan
-                </span>
-                {/* Pill toggle */}
-                <div
-                  className="relative w-11 h-6 rounded-full flex-shrink-0 transition-colors duration-200"
-                  style={{ background: theme === 'dark' ? 'var(--primary)' : 'var(--warning)' }}
+
+                <div className="flex flex-col items-center py-4 px-2 border-r border-[--border]">
+                  <span className="font-cormorant text-[28px] font-bold leading-none text-[--text-primary]">
+                    {doaCount}
+                  </span>
+                  <span className="font-jakarta text-[10px] font-medium tracking-widest uppercase text-[--text-secondary] mt-1">
+                    Doa
+                  </span>
+                </div>
+
+                <div className="flex flex-col items-center py-4 px-2">
+                  <span className="font-cormorant text-[28px] font-bold leading-none text-[--gold]">
+                    {streak}
+                  </span>
+                  <span className="font-jakarta text-[10px] font-medium tracking-widest uppercase text-[--text-secondary] mt-1">
+                    Streak
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+
+          </div>
+
+          {/* ── RIGHT COLUMN (desktop) / BOTTOM (mobile) ── */}
+          <div className="flex flex-col gap-3 mt-3 md:mt-0">
+
+            {/* Group — AKAUN */}
+            <motion.div variants={item} className="mx-4 md:mx-0">
+              <p className="font-jakarta text-[10px] font-semibold tracking-widest uppercase text-[--text-secondary] mb-2 px-1">
+                Akaun
+              </p>
+              <div className="bg-[--surface-raised] border border-[--border] rounded-2xl overflow-hidden">
+
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/profil/maklumat')}
+                  className="w-full flex items-center gap-3 py-3.5 px-4 border-b border-[--border] text-left"
                 >
+                  <div className="w-9 h-9 rounded-full bg-[--primary-muted] flex items-center justify-center shrink-0">
+                    <User size={16} className="text-[--primary]" />
+                  </div>
+                  <span className="font-jakarta text-sm text-[--text-primary] flex-1">
+                    Maklumat Peribadi
+                  </span>
+                  <ChevronRight size={16} className="text-[--text-secondary]" />
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/masjid')}
+                  className="w-full flex items-center gap-3 py-3.5 px-4 border-b border-[--border] text-left"
+                >
+                  <div className="w-9 h-9 rounded-full bg-[--primary-muted] flex items-center justify-center shrink-0">
+                    <Building2 size={16} className="text-[--primary]" />
+                  </div>
+                  <span className="font-jakarta text-sm text-[--text-primary] flex-1">
+                    Masjid Saya
+                  </span>
+                  <span className="font-jakarta text-xs text-[--text-secondary] mr-2">
+                    {mosqueCount}
+                  </span>
+                  <ChevronRight size={16} className="text-[--text-secondary]" />
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/profil/notifikasi')}
+                  className="w-full flex items-center gap-3 py-3.5 px-4 text-left"
+                >
+                  <div className="w-9 h-9 rounded-full bg-[--primary-muted] flex items-center justify-center shrink-0">
+                    <Bell size={16} className="text-[--primary]" />
+                  </div>
+                  <span className="font-jakarta text-sm text-[--text-primary] flex-1">
+                    Notifikasi
+                  </span>
+                  <ChevronRight size={16} className="text-[--text-secondary]" />
+                </motion.button>
+
+              </div>
+            </motion.div>
+
+            {/* Group — KEUTAMAAN */}
+            <motion.div variants={item} className="mx-4 md:mx-0">
+              <p className="font-jakarta text-[10px] font-semibold tracking-widest uppercase text-[--text-secondary] mb-2 px-1">
+                Keutamaan
+              </p>
+              <div className="bg-[--surface-raised] border border-[--border] rounded-2xl overflow-hidden">
+
+                <div className="flex items-center gap-3 py-3.5 px-4 border-b border-[--border]">
+                  <div className="w-9 h-9 rounded-full bg-[--primary-muted] flex items-center justify-center shrink-0">
+                    <Globe size={16} className="text-[--primary]" />
+                  </div>
+                  <span className="font-jakarta text-sm text-[--text-primary] flex-1">
+                    Bahasa
+                  </span>
+                  <span className="font-jakarta text-xs text-[--text-secondary]">
+                    Bahasa Melayu
+                  </span>
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={toggleTheme}
+                  className="w-full flex items-center gap-3 py-3.5 px-4 text-left"
+                >
+                  <div className="w-9 h-9 rounded-full bg-[--primary-muted] flex items-center justify-center shrink-0">
+                    {theme === 'dark'
+                      ? <Moon size={16} className="text-[--primary]" />
+                      : <Sun size={16} className="text-[--primary]" />
+                    }
+                  </div>
+                  <span className="font-jakarta text-sm text-[--text-primary] flex-1">
+                    Mod Paparan
+                  </span>
                   <div
-                    className="absolute top-0.5 w-5 h-5 rounded-full transition-transform duration-200 shadow-sm"
+                    className="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0"
                     style={{
-                      background: '#fff',
-                      transform: theme === 'dark' ? 'translateX(1px)' : 'translateX(21px)',
+                      backgroundColor: theme === 'dark'
+                        ? 'var(--primary)'
+                        : 'var(--border-strong)',
                     }}
-                  />
-                </div>
-              </button>
-            </div>
+                  >
+                    <div
+                      className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200"
+                      style={{
+                        transform: theme === 'dark'
+                          ? 'translateX(20px)'
+                          : 'translateX(2px)',
+                      }}
+                    />
+                  </div>
+                </motion.button>
+
+              </div>
+            </motion.div>
+
+            {/* Section 4 — Daftar Keluar */}
+            <motion.div variants={item} className="mx-4 md:mx-0 mt-1">
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSignOut}
+                className="w-full h-12 rounded-2xl border border-[--error]/30 text-[--error] font-jakarta text-sm font-medium"
+              >
+                Daftar Keluar
+              </motion.button>
+            </motion.div>
+
           </div>
         </div>
-
-        {/* ── Sign out ──────────────────────────────────────────────── */}
-        <div className="mx-5 mt-4 mb-6">
-          <button
-            onClick={handleSignOut}
-            className="flex items-center justify-center gap-2 w-full h-12 rounded-2xl text-[14px] font-semibold transition-colors active:opacity-80"
-            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--error)' }}
-          >
-            <LogOut size={16} strokeWidth={1.5} />
-            Daftar Keluar
-          </button>
-        </div>
-
-        <BottomNav />
       </div>
-    </div>
+    </motion.div>
   )
 }

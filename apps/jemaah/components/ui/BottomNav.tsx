@@ -17,7 +17,14 @@ export function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 md:hidden glass-surface safe-bottom">
+        <nav
+          className="fixed bottom-0 inset-x-0 z-50 md:hidden"
+          style={{
+            backgroundColor: 'var(--surface-raised)',
+            borderTop: '1px solid var(--border)',
+            paddingBottom: 'env(safe-area-inset-bottom)'
+          }}
+        >
       <div className="flex items-center justify-around h-16 px-2">
         {NAV.map(({ href, label, Icon }) => {
           const active = href === '/' ? pathname === href : pathname.startsWith(href)
@@ -30,36 +37,32 @@ export function BottomNav() {
             >
               <Link
                 href={href}
-                className="relative flex items-center justify-center min-h-[44px]"
+                className="flex items-center justify-center min-h-[44px]"
                 aria-current={active ? 'page' : undefined}
               >
-                <div className="relative flex items-center gap-1.5 px-3 py-2">
-                  {active && (
-                    <motion.div
-                      layoutId="bottom-nav-pill"
-                      className="absolute inset-0 rounded-full"
-                      style={{ background: 'var(--primary-muted)' }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    />
-                  )}
+                <span
+                  className="flex items-center gap-1 transition-all"
+                  style={active ? {
+                    backgroundColor: 'var(--primary-muted)',
+                    borderRadius: '12px',
+                    padding: '6px 14px',
+                  } : {
+                    padding: '6px 14px',
+                  }}
+                >
                   <Icon
                     size={20}
                     strokeWidth={active ? 2 : 1.6}
-                    className="relative z-10 flex-shrink-0 transition-colors"
-                    style={{ color: active ? 'var(--primary)' : 'var(--text-secondary)' }}
+                    className="flex-shrink-0 transition-colors"
+                    style={{ color: active ? 'var(--primary)' : 'var(--text-disabled)' }}
                   />
-                  {active && (
-                    <motion.span
-                      initial={{ opacity: 0, maxWidth: 0 }}
-                      animate={{ opacity: 1, maxWidth: '5rem' }}
-                      className="relative z-10 text-[12px] font-semibold overflow-hidden whitespace-nowrap"
-                      style={{ color: 'var(--primary)' }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    >
-                      {label}
-                    </motion.span>
-                  )}
-                </div>
+                  <span
+                    className={active ? 'text-[10px] font-semibold whitespace-nowrap' : 'hidden'}
+                    style={active ? { color: 'var(--primary)' } : {}}
+                  >
+                    {label}
+                  </span>
+                </span>
               </Link>
             </motion.div>
           )

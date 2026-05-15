@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ProfilContent } from '@/components/profil/ProfilContent'
+import { AppShell } from '@/components/ui/AppShell'
 import { getSolatStreak } from '@/app/actions/solat'
 
 export const metadata = { title: 'Profil' }
@@ -26,13 +27,15 @@ export default async function ProfilPage() {
   const { currentStreak } = await getSolatStreak()
 
   return (
-    <ProfilContent
-      email={user.email ?? ''}
-      name={user.user_metadata?.display_name ?? user.user_metadata?.full_name}
-      joinedAt={user.created_at}
-      mosqueCount={mosqueCount ?? 0}
-      doaCount={doaCount ?? 0}
-      streak={currentStreak}
-    />
+    <AppShell title="Profil">
+      <ProfilContent
+        email={user.email ?? ''}
+        name={user.user_metadata?.display_name ?? user.user_metadata?.full_name}
+        joinedAt={user.created_at}
+        mosqueCount={mosqueCount ?? 0}
+        doaCount={doaCount ?? 0}
+        streak={currentStreak}
+      />
+    </AppShell>
   )
 }

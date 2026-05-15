@@ -1,339 +1,366 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/browser'
-import { createProfile } from '@/app/actions/auth'
+import { SajdaLogo } from '@/components/icons/sajda-logo'
 
-type Step = 'form' | 'verify-email'
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring' as const, stiffness: 380, damping: 30 },
+  },
+}
+
+/* ─── Spinner ────────────────────────────────────────────────────────────── */
+
+function Spinner() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="animate-spin"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="3" strokeOpacity="0.3" />
+      <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/* ─── Mosque silhouette ──────────────────────────────────────────────────── */
+
+function MosqueSilhouette() {
+  return (
+    <svg viewBox="0 0 800 200" fill="white" xmlns="http://www.w3.org/2000/svg" className="w-full">
+      <rect x="0" y="188" width="800" height="12" />
+      <rect x="120" y="45" width="14" height="143" />
+      <polygon points="127,18 113,48 141,48" />
+      <rect x="123" y="8" width="8" height="12" />
+      <path d="M210 115 Q255 78 300 115 Z" />
+      <rect x="210" y="115" width="90" height="73" />
+      <rect x="666" y="45" width="14" height="143" />
+      <polygon points="673,18 659,48 687,48" />
+      <rect x="669" y="8" width="8" height="12" />
+      <path d="M500 115 Q545 78 590 115 Z" />
+      <rect x="500" y="115" width="90" height="73" />
+      <path d="M295 115 Q400 28 505 115 Z" />
+      <rect x="270" y="115" width="260" height="73" />
+      <path d="M365 188 L365 158 Q400 133 435 158 L435 188" fill="rgba(15,61,38,0.6)" />
+    </svg>
+  )
+}
+
+/* ─── Input wrapper ──────────────────────────────────────────────────────── */
+
+function Field({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <label
+        className="block text-[12px] font-semibold mb-1.5"
+        style={{ fontFamily: 'var(--font-jakarta)', color: 'var(--text-secondary)' }}
+      >
+        {label}
+      </label>
+      {children}
+    </div>
+  )
+}
+
+/* ─── RegisterForm ───────────────────────────────────────────────────────── */
 
 export function RegisterForm() {
   const router = useRouter()
-  const [step, setStep] = useState<Step>('form')
-  const [displayName, setDisplayName] = useState('')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
+  const [showPass, setShowPass] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleRegister(e: React.FormEvent) {
+  const inputStyle = (field: string): React.CSSProperties => ({
+    background: 'var(--surface-input)',
+    border: `1px solid ${focusedField === field ? 'var(--primary)' : 'var(--border)'}`,
+    color: 'var(--text-primary)',
+    fontFamily: 'var(--font-jakarta)',
+    transition: 'border-color 0.15s ease',
+  })
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError(null)
+    if (loading) return
+    setError('')
 
     if (password !== confirmPassword) {
       setError('Kata laluan tidak sepadan.')
       return
     }
-    if (password.length < 8) {
-      setError('Kata laluan mestilah sekurang-kurangnya 8 aksara.')
-      return
-    }
-    if (displayName.trim().length < 2) {
-      setError('Nama mestilah sekurang-kurangnya 2 aksara.')
+    if (password.length < 6) {
+      setError('Kata laluan mestilah sekurang-kurangnya 6 aksara.')
       return
     }
 
-    startTransition(async () => {
-      const supabase = createClient()
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { display_name: displayName.trim() },
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      })
+    setLoading(true)
+    const supabase = createClient()
 
-      if (signUpError) {
-        setError(
-          signUpError.message.includes('already registered')
-            ? 'E-mel ini sudah didaftarkan. Sila log masuk.'
-            : signUpError.message
-        )
-        return
-      }
-
-      // Session is immediately available (email confirmation disabled in Supabase dashboard)
-      if (data.session) {
-        const { error: profileError } = await createProfile(displayName)
-        if (profileError) {
-          setError(profileError)
-          return
-        }
-        router.push('/')
-        router.refresh()
-        return
-      }
-
-      // Email confirmation required — show verify step
-      setStep('verify-email')
+    const { data, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { display_name: name } },
     })
+
+    if (authError) {
+      setError(
+        authError.message.includes('already registered')
+          ? 'Emel ini sudah didaftarkan.'
+          : 'Pendaftaran gagal. Cuba semula.'
+      )
+      setLoading(false)
+      return
+    }
+
+    if (data.user) {
+      await (supabase as any)
+        .from('jemaah_profiles')
+        .insert({ user_id: data.user.id, display_name: name })
+    }
+
+    router.push('/')
+    router.refresh()
   }
 
-  function handleGoogleRegister() {
-    setError(null)
-    startTransition(async () => {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      })
-      if (error) setError(error.message)
-    })
-  }
+  return (
+    <div className="flex min-h-screen" style={{ background: 'var(--surface)' }}>
 
-  // ── Email verification pending screen ─────────────────────────────────
-  if (step === 'verify-email') {
-    return (
-      <div className="flex flex-col items-center text-center gap-4 py-4">
-        <div
-          className="w-16 h-16 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--primary)', border: '1px solid var(--border-accent)' }}
-        >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="var(--accent)" strokeWidth="1.8"/>
-            <polyline points="22,6 12,13 2,6" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round"/>
-          </svg>
-        </div>
-        <div>
-          <h3 className="text-base font-semibold mb-1" style={{ color: 'var(--text)' }}>
-            Semak E-mel Anda
-          </h3>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            Kami telah menghantar pautan pengesahan ke{' '}
-            <span style={{ color: 'var(--accent)' }}>{email}</span>.
-            Klik pautan tersebut untuk mengaktifkan akaun anda.
+      {/* ── Left branded panel (desktop only) ── */}
+      <div
+        className="hidden md:flex md:w-1/2 flex-col items-center justify-between py-14 px-12 relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #1E6B45 0%, #0F3D26 100%)' }}
+      >
+        <div />
+
+        <div className="flex flex-col items-center gap-6 z-10">
+          <SajdaLogo width={96} height={40} className="text-white" />
+          <p
+            className="text-[19px] text-center leading-loose"
+            style={{ fontFamily: 'var(--font-amiri)', color: 'rgba(201,168,76,0.90)' }}
+            dir="rtl"
+          >
+            بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
+          </p>
+          <p
+            className="text-[15px] text-center max-w-[260px] leading-relaxed"
+            style={{ fontFamily: 'var(--font-jakarta)', color: 'rgba(255,255,255,0.60)' }}
+          >
+            Rancang ibadah. Berhubung dengan jemaah.
           </p>
         </div>
-        <p className="text-xs mt-2" style={{ color: 'var(--text-dim)' }}>
-          Tidak terima e-mel?{' '}
-          <button
-            type="button"
-            className="underline"
-            style={{ color: 'var(--accent)' }}
-            onClick={() => setStep('form')}
+
+        <div className="w-full" style={{ opacity: 0.07 }}>
+          <MosqueSilhouette />
+        </div>
+      </div>
+
+      {/* ── Right auth panel ── */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-14">
+
+        {/* Mobile logo */}
+        <div className="md:hidden flex flex-col items-center gap-2 mb-8">
+          <SajdaLogo width={80} height={34} className="text-[--text-primary]" />
+          <p
+            className="text-[17px]"
+            style={{ fontFamily: 'var(--font-amiri)', color: 'var(--gold)' }}
+            dir="rtl"
           >
-            Cuba semula
-          </button>
-        </p>
-      </div>
-    )
-  }
-
-  // ── Registration form ─────────────────────────────────────────────────
-  return (
-    <div className="flex flex-col gap-4">
-      {/* Google SSO */}
-      <button
-        type="button"
-        onClick={handleGoogleRegister}
-        disabled={isPending}
-        className="flex items-center justify-center gap-3 w-full py-3 rounded-xl text-sm font-medium transition-all active:scale-[0.98] disabled:opacity-60"
-        style={{
-          background: 'var(--surface-3)',
-          border: '1px solid var(--border)',
-          color: 'var(--text)',
-        }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Daftar dengan Google
-      </button>
-
-      {/* Divider */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
-        <span className="text-xs" style={{ color: 'var(--text-dim)' }}>atau e-mel</span>
-        <div className="flex-1 h-px" style={{ background: 'var(--border)' }} />
-      </div>
-
-      {/* Form */}
-      <form onSubmit={handleRegister} className="flex flex-col gap-3">
-        {/* Display name */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-            Nama Paparan
-          </label>
-          <input
-            type="text"
-            autoComplete="name"
-            required
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Nama anda"
-            maxLength={60}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--border-accent)')}
-            onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
-          />
+            بِسْمِ اللَّهِ
+          </p>
         </div>
 
-        {/* Email */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-            E-mel
-          </label>
-          <input
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="nama@contoh.com"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--border-accent)')}
-            onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
-          />
-        </div>
-
-        {/* Password */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-            Kata Laluan
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 8 aksara"
-              minLength={8}
-              className="w-full px-4 py-3 pr-11 rounded-xl text-sm outline-none transition-colors"
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--border-accent)')}
-              onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
-              aria-label={showPassword ? 'Sembunyikan' : 'Tunjukkan'}
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          animate="show"
+          className="w-full max-w-sm"
+        >
+          {/* Card */}
+          <div
+            className="rounded-3xl p-6"
+            style={{
+              background: 'var(--surface-raised)',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--shadow-md)',
+            }}
+          >
+            <h1
+              className="text-[28px] font-bold leading-tight mb-1"
+              style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--text-primary)' }}
             >
-              {showPassword ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" stroke="var(--text-dim)" strokeWidth="1.8" strokeLinecap="round"/>
-                </svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="var(--text-dim)" strokeWidth="1.8"/>
-                  <circle cx="12" cy="12" r="3" stroke="var(--text-dim)" strokeWidth="1.8"/>
-                </svg>
+              Buat Akaun
+            </h1>
+            <p
+              className="text-[13px] mb-6"
+              style={{ fontFamily: 'var(--font-jakarta)', color: 'var(--text-secondary)' }}
+            >
+              Sertai komuniti jemaah SAJDA
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+
+              {/* Nama */}
+              <Field label="Nama Penuh">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Ahmad bin Ibrahim"
+                  required
+                  autoComplete="name"
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full rounded-xl px-4 py-3 text-[14px] outline-none placeholder:text-[--text-disabled]"
+                  style={inputStyle('name')}
+                />
+              </Field>
+
+              {/* Email */}
+              <Field label="Emel">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="nama@emel.com"
+                  required
+                  autoComplete="email"
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
+                  className="w-full rounded-xl px-4 py-3 text-[14px] outline-none placeholder:text-[--text-disabled]"
+                  style={inputStyle('email')}
+                />
+              </Field>
+
+              {/* Password */}
+              <Field label="Kata Laluan">
+                <div className="relative">
+                  <input
+                    type={showPass ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Min. 6 aksara"
+                    required
+                    autoComplete="new-password"
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full rounded-xl px-4 py-3 pr-11 text-[14px] outline-none placeholder:text-[--text-disabled]"
+                    style={inputStyle('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center"
+                    aria-label={showPass ? 'Sembunyikan kata laluan' : 'Tunjuk kata laluan'}
+                    style={{ color: 'var(--text-disabled)' }}
+                  >
+                    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </Field>
+
+              {/* Confirm password */}
+              <Field label="Sahkan Kata Laluan">
+                <div className="relative">
+                  <input
+                    type={showConfirm ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Ulang kata laluan"
+                    required
+                    autoComplete="new-password"
+                    onFocus={() => setFocusedField('confirm')}
+                    onBlur={() => setFocusedField(null)}
+                    className="w-full rounded-xl px-4 py-3 pr-11 text-[14px] outline-none placeholder:text-[--text-disabled]"
+                    style={inputStyle('confirm')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center"
+                    aria-label={showConfirm ? 'Sembunyikan kata laluan' : 'Tunjuk kata laluan'}
+                    style={{ color: 'var(--text-disabled)' }}
+                  >
+                    {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </Field>
+
+              {/* Error */}
+              {error && (
+                <p
+                  className="text-[12px]"
+                  style={{ fontFamily: 'var(--font-jakarta)', color: 'var(--error)' }}
+                >
+                  {error}
+                </p>
               )}
-            </button>
+
+              {/* Submit */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 rounded-2xl text-[14px] font-semibold flex items-center justify-center gap-2 mt-1"
+                style={{
+                  fontFamily: 'var(--font-jakarta)',
+                  background: 'var(--primary)',
+                  color: '#ffffff',
+                  opacity: loading ? 0.75 : 1,
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Spinner />
+                    <span>Memproses...</span>
+                  </>
+                ) : (
+                  <span>Daftar Sekarang</span>
+                )}
+              </motion.button>
+            </form>
           </div>
 
-          {/* Password strength indicator */}
-          {password.length > 0 && (
-            <div className="flex gap-1 mt-1">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-1 h-1 rounded-full transition-colors"
-                  style={{
-                    background: i < passwordStrength(password)
-                      ? strengthColor(passwordStrength(password))
-                      : 'var(--border)',
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Confirm password */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-            Sahkan Kata Laluan
-          </label>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="new-password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Ulang kata laluan"
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors"
-            style={{
-              background: 'var(--surface)',
-              border: `1px solid ${
-                confirmPassword && confirmPassword !== password
-                  ? 'var(--error)'
-                  : 'var(--border)'
-              }`,
-              color: 'var(--text)',
-            }}
-            onFocus={(e) => {
-              if (!confirmPassword || confirmPassword === password)
-                e.currentTarget.style.borderColor = 'var(--border-accent)'
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor =
-                confirmPassword && confirmPassword !== password ? 'var(--error)' : 'var(--border)'
-            }}
-          />
-        </div>
-
-        {/* Error */}
-        {error && (
+          {/* Bottom link */}
           <p
-            className="text-xs px-3 py-2 rounded-lg"
-            style={{ background: 'rgba(231,76,60,0.1)', color: 'var(--error)', border: '1px solid rgba(231,76,60,0.2)' }}
+            className="mt-5 text-center text-[13px]"
+            style={{ fontFamily: 'var(--font-jakarta)', color: 'var(--text-secondary)' }}
           >
-            {error}
+            Sudah ada akaun?{' '}
+            <Link
+              href="/login"
+              className="font-semibold"
+              style={{ color: 'var(--primary)' }}
+            >
+              Log masuk →
+            </Link>
           </p>
-        )}
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={isPending || !email || !password || !displayName}
-          className="w-full py-3 rounded-xl text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-1"
-          style={{
-            background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%)',
-            color: '#0F1923',
-            boxShadow: '0 4px 20px rgba(212,175,55,0.25)',
-          }}
-        >
-          {isPending ? 'Mendaftar…' : 'Daftar Akaun'}
-        </button>
-
-        <p className="text-[11px] text-center mt-1" style={{ color: 'var(--text-dim)' }}>
-          Dengan mendaftar, anda bersetuju dengan{' '}
-          <a href="/terma" style={{ color: 'var(--accent)' }}>Terma Perkhidmatan</a>
-          {' '}dan{' '}
-          <a href="/privasi" style={{ color: 'var(--accent)' }}>Dasar Privasi</a> kami.
-        </p>
-      </form>
+        </motion.div>
+      </div>
     </div>
   )
-}
-
-/* ── Helpers ─────────────────────────────────────────────────────────── */
-
-function passwordStrength(pwd: string): number {
-  let score = 0
-  if (pwd.length >= 8) score++
-  if (pwd.length >= 12) score++
-  if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++
-  if (/[0-9!@#$%^&*]/.test(pwd)) score++
-  return score
-}
-
-function strengthColor(score: number): string {
-  if (score <= 1) return 'var(--error)'
-  if (score === 2) return 'var(--warning)'
-  if (score === 3) return 'var(--accent)'
-  return 'var(--success)'
 }
